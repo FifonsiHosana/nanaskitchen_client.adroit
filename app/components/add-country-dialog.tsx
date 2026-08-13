@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react"
-import { toast } from "sonner"
-import { Plus } from "lucide-react"
-import { Button } from "./ui/button"
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { Plus } from "lucide-react";
+import { Button } from "./ui/button";
 import {
   Dialog,
   DialogClose,
@@ -10,8 +10,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "./ui/dialog"
-import { Field, FieldGroup, FieldLabel } from "./ui/field"
+} from "./ui/dialog";
+import { Field, FieldGroup, FieldLabel } from "./ui/field";
 import {
   Select,
   SelectContent,
@@ -19,52 +19,52 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./ui/select"
-import { CountryCombobox } from "./country-combobox"
+} from "./ui/select";
+import { CountryCombobox } from "./country-combobox";
 import {
   useCountriesStore,
   type CountryRecord,
-} from "../store/use_countries_store"
-import { usePricingMetaStore } from "../store/use_pricing_meta_store"
+} from "../store/use_countries_store";
+import { usePricingMetaStore } from "../store/use_pricing_meta_store";
 
 export function AddCountryDialog({
   countries,
 }: {
-  countries: CountryRecord[]
+  countries: CountryRecord[];
 }) {
-  const [open, setOpen] = useState(false)
-  const [selectedCountry, setSelectedCountry] = useState("")
-  const [currencyId, setCurrencyId] = useState("")
-  const [submitting, setSubmitting] = useState(false)
+  const [open, setOpen] = useState(false);
+  const [selectedCountry, setSelectedCountry] = useState("");
+  const [currencyId, setCurrencyId] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  const { addCountry } = useCountriesStore()
-  const { currencies, fetchCurrencies } = usePricingMetaStore()
+  const { addCountry } = useCountriesStore();
+  const { currencies, fetchCurrencies } = usePricingMetaStore();
 
   useEffect(() => {
-    if (open && currencies.length === 0) fetchCurrencies()
-  }, [open])
+    if (open && currencies.length === 0) fetchCurrencies();
+  }, [open]);
 
   async function handleSubmit() {
-    const code = selectedCountry.match(/\((\w{2})\)/)?.[1]
-    const label = selectedCountry.replace(/\s*\(\w{2}\)\s*$/, "").trim()
-    if (!code || !label) return toast.error("Select a country")
-    if (!currencyId) return toast.error("Select a currency")
+    const code = selectedCountry.match(/\((\w{2})\)/)?.[1];
+    const label = selectedCountry.replace(/\s*\(\w{2}\)\s*$/, "").trim();
+    if (!code || !label) return toast.error("Select a country");
+    if (!currencyId) return toast.error("Select a currency");
 
-    setSubmitting(true)
+    setSubmitting(true);
     const ok = await addCountry({
       countryLabel: label,
       countryCode: code,
       currencyId: Number(currencyId),
-    })
-    setSubmitting(false)
+    });
+    setSubmitting(false);
 
     if (ok) {
-      toast.success("Country added")
-      setSelectedCountry("")
-      setCurrencyId("")
-      setOpen(false)
+      toast.success("Country added");
+      setSelectedCountry("");
+      setCurrencyId("");
+      setOpen(false);
     } else {
-      toast.error("Failed to add country")
+      toast.error("Failed to add country");
     }
   }
 
@@ -90,11 +90,12 @@ export function AddCountryDialog({
           </Field>
           <Field>
             <FieldLabel>Currency</FieldLabel>
+
             <Select value={currencyId} onValueChange={setCurrencyId}>
               <SelectTrigger>
                 <SelectValue placeholder="Select currency" />
               </SelectTrigger>
-              <SelectContent className="z-[200]">
+              <SelectContent className="z-200">
                 <SelectGroup>
                   {currencies.map((c) => (
                     <SelectItem key={c.id} value={String(c.id)}>
@@ -104,6 +105,7 @@ export function AddCountryDialog({
                 </SelectGroup>
               </SelectContent>
             </Select>
+            
           </Field>
         </FieldGroup>
         <DialogFooter>
@@ -118,5 +120,5 @@ export function AddCountryDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
