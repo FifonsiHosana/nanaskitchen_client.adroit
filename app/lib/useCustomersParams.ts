@@ -9,10 +9,10 @@ const DEFAULT_CUSTOMER_PARAMS = {
   minPrice: "",
   maxPrice: "",
   search: "",
-  period: "all_time",
+  period: "this_week",
   customFrom: "",
   customTo: "",
-}
+};
 
 export function useCustomersParams() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -31,7 +31,7 @@ export function useCustomersParams() {
     country: searchParams.get("country") || DEFAULT_CUSTOMER_PARAMS.country,
     page: Number(searchParams.get("page") || DEFAULT_CUSTOMER_PARAMS.page),
     pageSize: Number(
-      searchParams.get("pageSize") || DEFAULT_CUSTOMER_PARAMS.pageSize
+      searchParams.get("pageSize") || DEFAULT_CUSTOMER_PARAMS.pageSize,
     ),
     minPrice: searchParams.get("minPrice") || DEFAULT_CUSTOMER_PARAMS.minPrice,
     maxPrice: searchParams.get("maxPrice") || DEFAULT_CUSTOMER_PARAMS.maxPrice,
@@ -42,10 +42,10 @@ export function useCustomersParams() {
     periodQuery:
       period === "custom" && customFrom && customTo
         ? { from: customFrom, to: customTo }
-        : period === "all_time"
+        : period === "this_week"
           ? {}
           : { period },
-  }
+  };
 
   const setParam = (
     key: keyof typeof DEFAULT_CUSTOMER_PARAMS,

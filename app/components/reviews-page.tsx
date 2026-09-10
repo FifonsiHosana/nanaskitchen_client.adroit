@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import { useEffect, useRef } from "react"
-import { toast } from "sonner"
+import { useEffect, useRef } from "react";
+import { toast } from "sonner";
 import {
   CheckCircle2,
   XCircle,
@@ -13,11 +13,11 @@ import {
   ThumbsDown,
   MessageSquare,
   Loader2,
-} from "lucide-react"
-import { Badge } from "~/components/ui/badge"
-import { Button } from "~/components/ui/button"
-import { Input } from "~/components/ui/input"
-import { Skeleton } from "~/components/ui/skeleton"
+} from "lucide-react";
+import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
+import { Skeleton } from "~/components/ui/skeleton";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,11 +29,15 @@ import {
   AlertDialogMedia,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "~/components/ui/alert-dialog"
-import { SummaryCard } from "~/components/summary-card"
-import { useReviewsStore, type Review, type ReviewStatus } from "../store/use-reviews-store"
-import { ScrollArea } from "~/components/ui/scroll-area"
-
+} from "~/components/ui/alert-dialog";
+import { SummaryCard } from "~/components/summary-card";
+import {
+  useReviewsStore,
+  type Review,
+  type ReviewStatus,
+} from "../store/use-reviews-store";
+import { ScrollArea } from "~/components/ui/scroll-area";
+import { usePermission } from "../hooks/use-permission";
 
 // ─── Star Rating ─────────────────────────────────────────────────────────────
 function StarRating({ rating, max = 5 }: { rating: number; max?: number }) {
@@ -50,7 +54,7 @@ function StarRating({ rating, max = 5 }: { rating: number; max?: number }) {
         />
       ))}
     </div>
-  )
+  );
 }
 
 // ─── Status Badge ────────────────────────────────────────────────────────────
@@ -61,26 +65,30 @@ function StatusBadge({ status }: { status: ReviewStatus }) {
         <CheckCircle2 className="h-3 w-3" />
         Approved
       </Badge>
-    )
+    );
   if (status === "rejected")
     return (
       <Badge className="bg-(--out-of-stock) gap-1">
         <XCircle className="h-3 w-3" />
         Rejected
       </Badge>
-    )
+    );
   return (
     <Badge className="gap-1 bg-(--status-pending-review)">
       <Clock className="h-3 w-3" />
       Pending
     </Badge>
-  )
+  );
 }
 
 // ─── Approve Dialog ──────────────────────────────────────────────────────────
 function ApproveDialog({ review }: { review: Review }) {
-  const { approveReview, isActionLoading } = useReviewsStore()
-  const busy = isActionLoading === review.id
+  const { approveReview, isActionLoading } = useReviewsStore();
+  const busy = isActionLoading === review.id;
+  // PATCH /reviews/:id/approve requires reviews/edit — omit until resolved.
+  const { allowed: canEdit, loaded } = usePermission("reviews", "edit");
+
+  if (!loaded || !canEdit) return null;
 
   return (
     <AlertDialog>
@@ -118,8 +126,8 @@ function ApproveDialog({ review }: { review: Review }) {
           <AlertDialogAction
             className="bg-(--status-approve)"
             onClick={async () => {
-              await approveReview(review.id)
-              toast.success("Review approved and published")
+              await approveReview(review.id);
+              toast.success("Review approved and published");
             }}
           >
             Approve
@@ -127,13 +135,17 @@ function ApproveDialog({ review }: { review: Review }) {
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
-  )
+  );
 }
 
 // ─── Reject Dialog ───────────────────────────────────────────────────────────
 function RejectDialog({ review }: { review: Review }) {
-  const { rejectReview, isActionLoading } = useReviewsStore()
-  const busy = isActionLoading === review.id
+  const { rejectReview, isActionLoading } = useReviewsStore();
+  const busy = isActionLoading === review.id;
+  // PATCH /reviews/:id/reject requires reviews/edit — omit until resolved.
+  const { allowed: canEdit, loaded } = usePermission("reviews", "edit");
+
+  if (!loaded || !canEdit) return null;
 
   return (
     <AlertDialog>
@@ -159,9 +171,9 @@ function RejectDialog({ review }: { review: Review }) {
           </AlertDialogMedia>
           <AlertDialogTitle>Reject Review?</AlertDialogTitle>
           <AlertDialogDescription>
-            This will hide the review by{" "}
-            <strong>{review.customerName}</strong>. It will not be visible to
-            customers. You can approve it later if needed.
+            This will hide the review by <strong>{review.customerName}</strong>.
+            It will not be visible to customers. You can approve it later if
+            needed.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
@@ -169,8 +181,8 @@ function RejectDialog({ review }: { review: Review }) {
           <AlertDialogAction
             variant="destructive"
             onClick={async () => {
-              await rejectReview(review.id)
-              toast.success("Review rejected")
+              await rejectReview(review.id);
+              toast.success("Review rejected");
             }}
           >
             Reject
@@ -178,7 +190,7 @@ function RejectDialog({ review }: { review: Review }) {
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
-  )
+  );
 }
 
 // ─── Review Card ─────────────────────────────────────────────────────────────
@@ -187,14 +199,20 @@ function ReviewCard({ review }: { review: Review }) {
     day: "numeric",
     month: "short",
     year: "numeric",
-  })
+  });
+  // Hide the whole action footer when approve/reject are gated out.
+  const { allowed: canEditReviews, loaded: permsLoaded } = usePermission(
+    "reviews",
+    "edit",
+  );
+  const showActions = permsLoaded && canEditReviews;
 
   const initials = review.customerName
     ?.split(" ")
     .map((n) => n[0])
     .join("")
     .toUpperCase()
-    .slice(0, 2)
+    .slice(0, 2);
 
   return (
     <div className="flex h-full flex-col gap-4 rounded-xl border bg-card p-5 transition-all hover:shadow-xs ">
@@ -230,7 +248,7 @@ function ReviewCard({ review }: { review: Review }) {
           <p className="truncate text-xs font-medium text-foreground">
             {review.productName}
           </p>
-          <StarRating rating={review.rating}  />
+          <StarRating rating={review.rating} />
         </div>
         <span className="shrink-0 text-[11px] font-medium text-muted-foreground">
           {dateLabel}
@@ -246,20 +264,22 @@ function ReviewCard({ review }: { review: Review }) {
       </div>
 
       {/* 4. Action Footer (Always Pinned to Bottom) */}
-      <div className="mt-auto flex items-center justify-between gap-2 border-t pt-4">
-        <div className="flex items-center gap-2">
-          {review.status !== "approved" && <ApproveDialog review={review} />}
-          {review.status !== "rejected" && <RejectDialog review={review} />}
-        </div>
+      {showActions && (
+        <div className="mt-auto flex items-center justify-between gap-2 border-t pt-4">
+          <div className="flex items-center gap-2">
+            {review.status !== "approved" && <ApproveDialog review={review} />}
+            {review.status !== "rejected" && <RejectDialog review={review} />}
+          </div>
 
-        {review.status !== "pending" && (
-          <span className="text-[11px] font-medium text-muted-foreground">
-            {review.status === "approved" ? "● Published" : "○ Hidden"}
-          </span>
-        )}
-      </div>
+          {review.status !== "pending" && (
+            <span className="text-[11px] font-medium text-muted-foreground">
+              {review.status === "approved" ? "● Published" : "○ Hidden"}
+            </span>
+          )}
+        </div>
+      )}
     </div>
-  )
+  );
 }
 
 // ─── Card Skeleton ────────────────────────────────────────────────────────────
@@ -291,7 +311,7 @@ function ReviewCardSkeleton() {
         <Skeleton className="h-8 w-24 rounded-md" />
       </div>
     </div>
-  )
+  );
 }
 
 // ─── Stat Skeleton ────────────────────────────────────────────────────────────
@@ -302,7 +322,7 @@ function StatSkeleton() {
       <Skeleton className="h-7 w-14" />
       <Skeleton className="h-2.5 w-24" />
     </div>
-  )
+  );
 }
 
 // ─── Empty State ──────────────────────────────────────────────────────────────
@@ -324,19 +344,19 @@ function EmptyState({ status }: { status: ReviewStatus | "all" }) {
       icon: <MessageSquare className="h-10 w-10 text-muted-foreground/40" />,
       text: "No reviews found.",
     },
-  }
-  const msg = messages[status] ?? messages.all
+  };
+  const msg = messages[status] ?? messages.all;
   return (
     <div className="flex flex-col items-center justify-center gap-3 rounded-xl border bg-muted/10 py-16 text-center">
       {msg.icon}
       <p className="text-sm text-muted-foreground">{msg.text}</p>
     </div>
-  )
+  );
 }
 
 // ─── Reviews Page (shared) ────────────────────────────────────────────────────
 interface ReviewsPageProps {
-  status: ReviewStatus | "all"
+  status: ReviewStatus | "all";
 }
 
 export function ReviewsPage({ status }: ReviewsPageProps) {
@@ -346,29 +366,33 @@ export function ReviewsPage({ status }: ReviewsPageProps) {
     isLoading,
     searchQuery,
     fetchReviews,
-    setSearch,rejectReview,approveReview
-  } = useReviewsStore()
+    setSearch,
+    rejectReview,
+    approveReview,
+  } = useReviewsStore();
 
-  const searchRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const searchRef = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined,
+  );
 
   useEffect(() => {
-    fetchReviews(status)
-  }, [fetchReviews, status])
+    fetchReviews(status);
+  }, [fetchReviews, status]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    clearTimeout(searchRef.current)
-    searchRef.current = setTimeout(() => setSearch(e.target.value), 300)
-  }
+    clearTimeout(searchRef.current);
+    searchRef.current = setTimeout(() => setSearch(e.target.value), 300);
+  };
 
   const filtered = reviews.filter((r) => {
-    const q = searchQuery.toLowerCase()
+    const q = searchQuery.toLowerCase();
     return (
       !q ||
       r.customerName.toLowerCase().includes(q) ||
       r.productName.toLowerCase().includes(q) ||
       r.comment.toLowerCase().includes(q)
-    )
-  })
+    );
+  });
 
   return (
     <div className="flex flex-col gap-4 p-4">
@@ -451,5 +475,5 @@ export function ReviewsPage({ status }: ReviewsPageProps) {
         </div>
       )}
     </div>
-  )
+  );
 }

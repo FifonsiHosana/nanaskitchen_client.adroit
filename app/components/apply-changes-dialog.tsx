@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react"
-import { Button } from "~/components/ui/button"
+import React, { useEffect, useState } from "react";
+import { Button } from "~/components/ui/button";
 import {
   Dialog,
   DialogClose,
@@ -9,21 +9,22 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "~/components/ui/dialog"
-import { Checkbox } from "./ui/checkbox"
-import { useFlavorStore } from "../store/use_flavor_store"
-import { toast } from "sonner"
-import { Loader2 } from "lucide-react"
-import { PRICE_GROUPS } from "../lib/price-groups"
+} from "~/components/ui/dialog";
+import { Checkbox } from "./ui/checkbox";
+import { useFlavorStore } from "../store/use_flavor_store";
+import { usePermission } from "../hooks/use-permission";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
+import { PRICE_GROUPS } from "../lib/price-groups";
 
 export function ApplyChangesDialog({
   children,
   sourceFlavorId,
   onConfirmed,
 }: {
-  children: React.ReactNode
-  sourceFlavorId: number
-  onConfirmed?: () => void
+  children: React.ReactNode;
+  sourceFlavorId: number;
+  onConfirmed?: () => void;
 }) {
   const {
     flavors,
@@ -34,63 +35,74 @@ export function ApplyChangesDialog({
     previewApplyTiers,
     applyTiersToFlavors,
     clearPreview,
-  } = useFlavorStore()
+  } = useFlavorStore();
 
-  const [open, setOpen] = useState(false)
-  const [step, setStep] = useState<"select" | "preview">("select")
-  const [selectedFlavors, setSelectedFlavors] = useState<number[]>([])
-  const [selectedGroups, setSelectedGroups] = useState<number[]>(PRICE_GROUPS.map((g) => g.id))
+  const [open, setOpen] = useState(false);
+  const [step, setStep] = useState<"select" | "preview">("select");
+  const [selectedFlavors, setSelectedFlavors] = useState<number[]>([]);
+  const [selectedGroups, setSelectedGroups] = useState<number[]>(
+    PRICE_GROUPS.map((g) => g.id),
+  );
+  // POST /products/price-list/tiers/apply requires products/edit.
+  // The parent sheet already gates the trigger; this guards direct reuse.
+  const { allowed: canEdit, loaded } = usePermission("products", "edit");
 
   useEffect(() => {
-    if (open && flavors.length === 0) fetchFlavors()
-  }, [open])
+    if (open && flavors.length === 0) fetchFlavors();
+  }, [open]);
 
   const toggleFlavor = (id: number) =>
     setSelectedFlavors((prev) =>
-      prev.includes(id) ? prev.filter((f) => f !== id) : [...prev, id]
-    )
+      prev.includes(id) ? prev.filter((f) => f !== id) : [...prev, id],
+    );
 
   const toggleGroup = (id: number) =>
     setSelectedGroups((prev) =>
-      prev.includes(id) ? prev.filter((g) => g !== id) : [...prev, id]
-    )
+      prev.includes(id) ? prev.filter((g) => g !== id) : [...prev, id],
+    );
 
   const handleOpenChange = (val: boolean) => {
-    setOpen(val)
+    setOpen(val);
     if (!val) {
       // reset on close
-      setStep("select")
-      setSelectedFlavors([])
-      setSelectedGroups(PRICE_GROUPS.map((g) => g.id))
-      clearPreview()
+      setStep("select");
+      setSelectedFlavors([]);
+      setSelectedGroups(PRICE_GROUPS.map((g) => g.id));
+      clearPreview();
     }
-  }
+  };
 
   const handlePreview = async () => {
     if (selectedFlavors.length === 0) {
-      toast.warning("Select at least one flavor to apply to")
-      return
+      toast.warning("Select at least one flavor to apply to");
+      return;
     }
     if (selectedGroups.length === 0) {
-      toast.warning("Select at least one pricing group")
-      return
+      toast.warning("Select at least one pricing group");
+      return;
     }
-    await previewApplyTiers(sourceFlavorId, selectedFlavors, selectedGroups)
-    setStep("preview")
-  }
+    await previewApplyTiers(sourceFlavorId, selectedFlavors, selectedGroups);
+    setStep("preview");
+  };
 
   const handleConfirm = async () => {
     try {
-      await applyTiersToFlavors(sourceFlavorId, selectedFlavors, selectedGroups)
-      toast.success("Pricing applied successfully!")
-      setOpen(false)
-      onConfirmed?.()
+      await applyTiersToFlavors(
+        sourceFlavorId,
+        selectedFlavors,
+        selectedGroups,
+      );
+      toast.success("Pricing applied successfully!");
+      setOpen(false);
+      onConfirmed?.();
     } catch {
-      toast.error("Failed to apply pricing")
+      toast.error("Failed to apply pricing");
     }
-  }
+  };
 
-  const currentFlavorId = priceTier[0]?.flavorId
+  const currentFlavorId = priceTier[0]?.flavorId;
+
+  if (!loaded || !canEdit) return null;
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -110,7 +122,7 @@ export function ApplyChangesDialog({
             <div className="space-y-2">
               <p className="text-sm font-medium">Flavors</p>
               {flavors.map((flavor) => {
-                const isSource = flavor.id === currentFlavorId
+                const isSource = flavor.id === currentFlavorId;
                 return (
                   <div
                     key={flavor.id}
@@ -132,7 +144,7 @@ export function ApplyChangesDialog({
                       onCheckedChange={() => toggleFlavor(flavor.id)}
                     />
                   </div>
-                )
+                );
               })}
             </div>
 
@@ -157,9 +169,10 @@ export function ApplyChangesDialog({
 
             <DialogFooter className="mt-4">
               <DialogClose asChild>
-                <Button variant="outline">Cancel</Button>
+                <Button variant="destructive">Cancel</Button>
               </DialogClose>
               <Button
+                className="bg-status-pending text-status-pending-text"
                 onClick={handlePreview}
                 disabled={
                   previewLoading ||
@@ -256,5 +269,5 @@ export function ApplyChangesDialog({
         )}
       </DialogContent>
     </Dialog>
-  )
+  );
 }

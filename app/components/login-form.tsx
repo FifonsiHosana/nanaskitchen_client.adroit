@@ -1,84 +1,85 @@
-import { cn } from "~/lib/utils"
-import { Button } from "~/components/ui/button"
+import { cn } from "~/lib/utils";
+import { Button } from "~/components/ui/button";
+import { Field, FieldGroup, FieldLabel } from "~/components/ui/field";
+import { Input } from "~/components/ui/input";
+import logo from "~/assets/nanaslogo.png";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { api } from "../lib/axios";
+import { useAuthStore } from "../store/use_auth_store";
+import { useEffect, useState, type SyntheticEvent } from "react";
+import { useLocation, useNavigate } from "react-router";
+import logoDark from "~/assets/nana-logo-dark.png";
+import { Eye, EyeIcon, EyeOff, EyeOffIcon, InfoIcon } from "lucide-react";
+import { usePermissionsStore } from "../store/v2/use-permissions-store";
 import {
-  Field,
-  FieldGroup,
-  FieldLabel,
-  FieldSeparator,
-} from "~/components/ui/field"
-import { Input } from "~/components/ui/input"
-import logo from "~/assets/nanaslogo.png"
-import { z } from "zod"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { api } from "../lib/axios"
-import { useAuthStore } from "../store/use_auth_store"
-import { useEffect, type SyntheticEvent } from "react"
-import { useLocation, useNavigate } from "react-router"
-import logoDark from "~/assets/nana-logo-dark.png"
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+  InputGroupText,
+} from "./ui/input-group";
 
 const formSchema = z.object({
   email: z.email(),
   password: z.string().min(6),
-})
+});
 
 export interface Admin {
-  email: string
-  password: string
+  email: string;
+  password: string;
 }
 
-type FormValues = z.infer<typeof formSchema>
+type FormValues = z.infer<typeof formSchema>;
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"form">) {
-  const { register, setValue, handleSubmit } = useForm<FormValues>({
+  const { register, handleSubmit } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     mode: "onSubmit",
     reValidateMode: "onSubmit",
-  })
+  });
 
-  const { loginUser, isLoading, error } = useAuthStore()
-  const navigate = useNavigate()
+  const { loginUser, isLoading, error, isAuthenticated } = useAuthStore();
+  const { fetchPermissions } = usePermissionsStore();
+  const navigate = useNavigate();
 
-  // redirect if already logged in
+  const [viewPassword, setViewPassword] = useState(false);
+
+  // Already logged in? Skip the form.
   useEffect(() => {
-    const token = localStorage.getItem("userToken")
-    if (token) navigate("/portal", { replace: true })
-  }, [])
+    if (isAuthenticated) {
+      navigate("/portal", { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   async function onSubmit(data: FormValues) {
-    await loginUser({ email: data.email, password: data.password })
-    const token = localStorage.getItem("userToken")
-    if (token) {
-      navigate("/portal", { replace: true })
-    }
+    const success = await loginUser({
+      email: data.email,
+      password: data.password,
+    });
+    if (!success) return;
+
+    await fetchPermissions();
+    navigate("/portal", { replace: true });
   }
-
-  const location = useLocation()
-
-  useEffect(() => {
-    const token = localStorage.getItem("userToken")
-    if (token && location.pathname !== "/portal")
-      navigate("/portal", { replace: true })
-    // console.log("pass")
-  }, [location.pathname])
 
   return (
     <form
-      className={cn("flex flex-col gap-6", className)}
+      className={cn("flex flex-col gap-6 text-2xl", className)}
       onSubmit={handleSubmit(onSubmit, (errors) =>
-        console.log("validation errors:", errors)
+        console.log("validation errors:", errors),
       )}
       {...props}
     >
       {" "}
-      <div className="mx-4 flex items-center justify-center">
+      <div className="mx-4  flex items-center justify-center">
         <div className="object-contain">
           <img
             draggable={false}
-            className="h-15"
+            className="h-18"
             src={logoDark}
             alt="Nana Logo"
           />
@@ -98,22 +99,34 @@ export function LoginForm({
             id="email"
             placeholder="m@example.com"
             required
+            className="h-11 text-base py-0"
           />
         </Field>
         <Field>
-          <div className="flex items-center">
-            <FieldLabel htmlFor="password">Password</FieldLabel>
-          </div>
-          <Input
-            {...register("password")}
-            id="password"
-            type="password"
-            required
-          />
+          <FieldLabel htmlFor="input-group-url">Password</FieldLabel>
+          {/* Apply h-12 directly to the outer container and reset inner input styling */}
+          <InputGroup className="h-11 items-center">
+            <InputGroupInput
+              {...register("password")}
+              className="h-full text-base py-0 placeholder:tracking-widest"
+              id="password"
+              type={viewPassword ? "password" : "text"}
+              required
+              placeholder="•••••••"
+            />
+            <InputGroupAddon></InputGroupAddon>
+            <InputGroupAddon
+              align="inline-end"
+              className="cursor-pointer"
+              onClick={() => setViewPassword(!viewPassword)}
+            >
+              {viewPassword ? <EyeIcon /> : <EyeOffIcon />}
+            </InputGroupAddon>
+          </InputGroup>
         </Field>
         <Field>
-          <Button className="cursor-pointer" type="submit">
-            {isLoading ? "login in..." : "Login"}
+          <Button className="cursor-pointer h-11 font-bold uppercase text-xs" type="submit">
+            {isLoading ? "login in..." :  "Login"}
           </Button>
         </Field>
         {error && <p className="text-sm text-red-500">{error}</p>}
@@ -125,5 +138,5 @@ export function LoginForm({
         </a>
       </FieldGroup>
     </form>
-  )
+  );
 }

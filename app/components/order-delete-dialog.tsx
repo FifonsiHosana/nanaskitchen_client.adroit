@@ -1,7 +1,8 @@
-import { Trash2Icon, TrashIcon } from "lucide-react"
-import { toast } from "sonner"
-import type { statusType } from "../store/use-order-store"
-import { useOrderStore } from "../store/use-order-store"
+import { Trash2Icon, TrashIcon } from "lucide-react";
+import { toast } from "sonner";
+import type { statusType } from "../store/use-order-store";
+import { useOrderStore } from "../store/use-order-store";
+import { usePermission } from "../hooks/use-permission";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,17 +14,22 @@ import {
   AlertDialogMedia,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "~/components/ui/alert-dialog"
-import { DropdownMenuItem } from "./ui/dropdown-menu"
+} from "~/components/ui/alert-dialog";
+import { DropdownMenuItem } from "./ui/dropdown-menu";
 
 export function AlertDialogDestructive({
   id,
   status,
 }: {
-  id: string
-  status: statusType
+  id: string;
+  status: statusType;
 }) {
-  const { deleteOrder } = useOrderStore()
+  const { deleteOrder } = useOrderStore();
+  // DELETE /orders/:id requires orders/delete — omit the trigger entirely
+  // (never flash it) until permissions resolve.
+  const { allowed: canDelete, loaded } = usePermission("orders", "delete");
+
+  if (!loaded || !canDelete) return null;
 
   return (
     <AlertDialog>
@@ -52,12 +58,12 @@ export function AlertDialogDestructive({
           <AlertDialogAction
             variant="destructive"
             onClick={() => {
-              deleteOrder(id)
+              deleteOrder(id);
               toast.success(
                 status === "all" || status === "trash"
                   ? "Order moved to trash"
-                  : "Order deleted"
-              )
+                  : "Order deleted",
+              );
             }}
           >
             Delete
@@ -65,5 +71,5 @@ export function AlertDialogDestructive({
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
-  )
+  );
 }

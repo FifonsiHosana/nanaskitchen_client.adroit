@@ -5,11 +5,11 @@ import {
   PopoverHeader,
   PopoverTitle,
   PopoverTrigger,
-} from "~/components/ui/popover"
-import { Button } from "./ui/button"
-import { useOrderStore } from "../store/use-order-store"
-import { Avatar } from "./ui/avatar"
-import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip"
+} from "~/components/ui/popover";
+import { Button } from "./ui/button";
+import { useOrderStore } from "../store/use-order-store";
+import { Avatar } from "./ui/avatar";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import {
   Sheet,
   SheetClose,
@@ -19,30 +19,30 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "~/components/ui/sheet"
+} from "~/components/ui/sheet";
 import {
   addCurrencySymbol,
   CURRENCY_SYMBOLS,
   dateNormalize,
   handleCopy,
   STATUS_CONFIG,
-} from "../lib/utils"
-import { Home, Mail, Mailbox, Phone } from "lucide-react"
-import type { DataType } from "../types"
+} from "../lib/utils";
+import { Home, Mail, Mailbox, Phone } from "lucide-react";
+import type { DataType } from "../types";
 
 export function OrderDetails({
   open,
   onOpenChange,
   selectedOrder,
 }: {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  selectedOrder: DataType | null
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  selectedOrder: DataType | null;
 }) {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       {/* <SheetTrigger asChild>{children}</SheetTrigger> */}
-      <SheetContent>
+      <SheetContent className="data-[side=right]:sm:w-[30%] z-[9999]">
         {selectedOrder && (
           <>
             <SheetHeader>
@@ -55,15 +55,17 @@ export function OrderDetails({
 
             <div className="mx-4 flex justify-between gap-2">
               <span
-                className={`rounded-md px-2 py-0.5 font-medium`}
+                className={`rounded-md px-2 py-0.5 font-medium flex items-center justify-center text-sm`}
                 style={{
                   backgroundColor: STATUS_CONFIG[selectedOrder.status]?.color,
                 }}
               >
                 {STATUS_CONFIG[selectedOrder.status]?.label}
               </span>
-              <span className="text-xs text-gray-400">
-                {dateNormalize(selectedOrder.date.split(" ")[0])}
+              <span className="text-sm flex items-center gap-1 ">
+                <span> {dateNormalize(selectedOrder.date.split(" ")[0])}</span>
+                <span className="text-gray-500">●</span>
+                <span>{selectedOrder.date.split(" ")[1].slice(0, 5)}</span>
               </span>
             </div>
 
@@ -83,7 +85,9 @@ export function OrderDetails({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div
-                    onClick={() => handleCopy(selectedOrder.email, "email address")}
+                    onClick={() =>
+                      handleCopy(selectedOrder.email, "email address")
+                    }
                     className="cursor-pointer"
                   >
                     <Avatar
@@ -102,7 +106,9 @@ export function OrderDetails({
               <Tooltip>
                 <TooltipTrigger>
                   <div
-                    onClick={() => handleCopy(selectedOrder.phone,"phone number")}
+                    onClick={() =>
+                      handleCopy(selectedOrder.phone, "phone number")
+                    }
                     className="cursor-pointer"
                   >
                     <Avatar
@@ -121,7 +127,9 @@ export function OrderDetails({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div
-                    onClick={() => handleCopy(selectedOrder.zip_code,"zip code")}
+                    onClick={() =>
+                      handleCopy(selectedOrder.zip_code, "zip code")
+                    }
                     className="cursor-pointer"
                   >
                     <Avatar
@@ -157,7 +165,7 @@ export function OrderDetails({
                         <p className="text-xs text-gray-400">
                           {addCurrencySymbol(
                             selectedOrder.currency,
-                            item.itemPrice.toString()
+                            item.itemPrice.toString(),
                           )}
                         </p>
                       </div>
@@ -179,7 +187,7 @@ export function OrderDetails({
                   <span className="text-xs font-normal">
                     {addCurrencySymbol(
                       selectedOrder.currency,
-                      selectedOrder.subtotal
+                      selectedOrder.subtotal,
                     )}
                   </span>
                 </div>{" "}
@@ -190,7 +198,7 @@ export function OrderDetails({
                       <span className="text-xs font-normal">
                         {addCurrencySymbol(
                           selectedOrder.currency,
-                          selectedOrder.delivery
+                          selectedOrder.delivery,
                         )}
                       </span>
                     </div>
@@ -202,7 +210,7 @@ export function OrderDetails({
                       <span className="text-xs font-normal">
                         {addCurrencySymbol(
                           selectedOrder.currency,
-                          selectedOrder.shipping
+                          selectedOrder.shipping,
                         )}
                       </span>
                     </div>
@@ -214,7 +222,7 @@ export function OrderDetails({
                       <span className="text-xs font-normal">
                         {addCurrencySymbol(
                           selectedOrder.currency,
-                          selectedOrder.packagingFee.toString()
+                          selectedOrder.packagingFee.toString(),
                         )}
                       </span>
                     </div>
@@ -244,7 +252,7 @@ export function OrderDetails({
                   <span className="font-normal">
                     {addCurrencySymbol(
                       selectedOrder.currency,
-                      selectedOrder.total
+                      selectedOrder.total,
                     )}
                   </span>
                 </div>
@@ -254,7 +262,7 @@ export function OrderDetails({
         )}
       </SheetContent>
     </Sheet>
-  )
+  );
 }
 
 // export default function OrderDetails({children}: {children: React.ReactNode}) {

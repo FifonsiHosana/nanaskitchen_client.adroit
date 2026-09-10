@@ -1,47 +1,12 @@
 import { create } from "zustand"
 import { api } from "~/lib/axios"
 
-// interface Customer {
-//   name: string
-//   email: string
-//   phone: string
-//   country: string
-// }
-
-// interface FeedbackRecord {
-//   id: number
-//   orderId: number
-//   customer: Customer
-//   attribution: string[]
-//   preferences: string[]
-// }
-
-// interface SummaryItem {
-//   label: string
-//   count: number
-//   percentage: number
-// }
-
-// interface Summary {
-//   totalResponses: number
-//   topChannel: string | null
-//   topPreference: string | null
-//   howTheyHeardAboutUs: SummaryItem[]
-//   whatTheyLike: SummaryItem[]
-// }
-
 interface LocationRecord {
   id: string
   location: string
   price: number
 }
 
-// interface CountryRecord {
-//   id: string
-//   country_label: string
-//   country_code: string
-//   // currency_label:string
-// }
 interface CountryRecord {
   id: number
   countryCode: string

@@ -1,13 +1,13 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState } from "react";
 import {
   ArchiveRestore,
   Eye,
   LocationEditIcon,
   MoreHorizontal,
   PencilIcon,
-} from "lucide-react"
-import { toast } from "sonner"
-import { Button } from "~/components/ui/button"
+} from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,11 +19,12 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu"
-import { useOrderStore, type statusType } from "../store/use-order-store"
-import ChangeOrderOptions from "./change-order-options"
-import { OrderDetails } from "./order-details"
-import { AlertDialogDestructive } from "./order-delete-dialog"
+} from "~/components/ui/dropdown-menu";
+import { useOrderStore, type statusType } from "../store/use-order-store";
+import { usePermission } from "../hooks/use-permission";
+import ChangeOrderOptions from "./change-order-options";
+import { OrderDetails } from "./order-details";
+import { AlertDialogDestructive } from "./order-delete-dialog";
 
 export function OrdersDropdown({
   id,
@@ -31,24 +32,32 @@ export function OrdersDropdown({
   status,
   orderId,
 }: {
-  pageStatus: statusType
-  id: string
-  status: statusType
-  orderId: string
+  pageStatus: statusType;
+  id: string;
+  status: statusType;
+  orderId: string;
 }) {
   const { selectedOrder, copyOrderLocation, updateOrderStatus } =
-    useOrderStore()
-  const [detailsOpen, setDetailsOpen] = useState(false)
+    useOrderStore();
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  // Status changes PATCH /orders/:id/status (orders/edit). The submenu
+  // trigger is omitted — not just emptied — when edit is not granted.
+  const { allowed: canEditOrders, loaded: permsLoaded } = usePermission(
+    "orders",
+    "edit",
+  );
+  const showStatusMenu =
+    permsLoaded && canEditOrders && selectedOrder?.status !== "delivered";
 
   useEffect(() => {
     // console.log(selectedOrder)
-  }, [selectedOrder])
+  }, [selectedOrder]);
 
   return (
     <DropdownMenu
       onOpenChange={(open) => {
         if (open) {
-          copyOrderLocation(id)
+          copyOrderLocation(id);
         }
       }}
     >
@@ -61,20 +70,29 @@ export function OrdersDropdown({
         <DropdownMenuGroup>
           <DropdownMenuSub>
             <DropdownMenuItem
+              disabled={
+                !selectedOrder?.location ||
+                selectedOrder.location === "null" ||
+                selectedOrder.location.includes("null")
+              }
               onClick={() => {
-                if (!selectedOrder || !selectedOrder.location) return
-                navigator.clipboard.writeText(selectedOrder.location)
-                toast.success("GPS location copied to clipboard")
+                if (
+                  !selectedOrder?.location ||
+                  selectedOrder.location === "null"
+                )
+                  return;
+                navigator.clipboard.writeText(selectedOrder.location);
+                toast.success("GPS location copied to clipboard");
               }}
             >
               <LocationEditIcon />
-              Copy gps location
+              Copy GPS location
             </DropdownMenuItem>
 
             <DropdownMenuItem
               onSelect={(e) => {
-                e.preventDefault()
-                setDetailsOpen(true)
+                e.preventDefault();
+                setDetailsOpen(true);
               }}
             >
               <Eye className="h-4 w-4" />
@@ -85,7 +103,7 @@ export function OrdersDropdown({
               onOpenChange={setDetailsOpen}
               selectedOrder={selectedOrder}
             />
-            {selectedOrder?.status !== "delivered" && (
+            {showStatusMenu && (
               <>
                 <DropdownMenuSubTrigger>
                   <PencilIcon className="h-4 w-4" />
@@ -118,5 +136,5 @@ export function OrdersDropdown({
         </DropdownMenuGroup> */}
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }

@@ -1,123 +1,107 @@
-"use client"
+"use client";
 
-import * as React from "react"
+import * as React from "react";
 
-import { NavMain } from "~/components/nav-main"
-import { NavUser } from "~/components/nav-user"
-import logoDark from "~/assets/nana-logo-dark.png"
+import { NavMain, type NavNode } from "~/components/nav-main";
+import { NavUser } from "~/components/nav-user";
+import logoDark from "~/assets/nana-logo-dark.png";
 
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
+  SidebarGroup,
   SidebarHeader,
+  SidebarMenu,
+  SidebarMenuSkeleton,
   SidebarRail,
-} from "~/components/ui/sidebar"
+} from "~/components/ui/sidebar";
 import {
   ChartPie,
   ShoppingBasket,
   Package,
   Star,
-  UserRoundCog,
-  LucideTruck,
-  PlaneTakeoff,
   Plane,
-} from "lucide-react"
-import { getUserInfo } from "../lib/storage"
-import { PRICE_GROUPS } from "../lib/price-groups"
-import type { NavSubGroupData } from "./nav-sub-group"
+  Footprints,
+  MessageSquareQuote,
+  ShieldCheck,
+  UserCircle,
+} from "lucide-react";
+import { getUserInfo } from "../lib/storage";
+import { buildNavItems, type NavItem } from "../lib/nav-items";
+import { useFlavorStore } from "../store/use_flavor_store";
+import { useAuthStore } from "../store/use_auth_store";
+import { usePermissionsStore } from "../store/v2/use-permissions-store";
+import { useIsAdmin } from "../hooks/use-is-admin";
 
-// Each price group exposes the same order sub-pages, scoped by /:group/.
-const orderGroups: NavSubGroupData[] = PRICE_GROUPS.map((g) => ({
-  title: g.label,
-  items: [
-    { title: "All Orders", url: `orders/${g.slug}/all` },
-    { title: "Awaiting Payment", url: `orders/${g.slug}/pending` },
-    { title: "Completed", url: `orders/${g.slug}/completed` },
-    { title: "Delivered", url: `orders/${g.slug}/delivered` },
-  ],
-}))
+const NAV_ICONS: Record<string, React.ReactNode> = {
+  Analytics: <ChartPie />,
+  Orders: <ShoppingBasket />,
+  Products: <Package />,
+  Reviews: <Star />,
+  Survey: <MessageSquareQuote />,
+  Shipping: <Plane />,
+  "Audit Trail": <Footprints />,
+};
 
-// Each price group exposes the same analytics sub-pages, scoped by /:group/.
-const analyticsGroups: NavSubGroupData[] = PRICE_GROUPS.map((g) => ({
-  title: g.label,
-  items: [
-    { title: "Sales", url: `anals/${g.slug}/sales` },
-    { title: "Customers", url: `anals/${g.slug}/customers` },
-    { title: "Feedback", url: `anals/${g.slug}/feedback` },
-  ],
-}))
-
-const data = {
-  navMain: [
-    {
-      title: "Analytics",
-      url: "anals-website",
-      icon: <ChartPie />,
-      isActive: true,
-      items: [
-        { title: "Website", url: "anals-website" },
-        { title: "Feedback Questions", url: "feedback-questions" },
-      ],
-      groups: analyticsGroups,
-    },
-    {
-      title: "Orders",
-      url: `orders/${PRICE_GROUPS[0].slug}/all`,
-      icon: <ShoppingBasket />,
-      groups: orderGroups,
-    },
-    {
-      title: "Products",
-      url: "products-flavors",
-      icon: <Package />,
-      items: [
-        { title: "Flavors", url: "products-flavors" },
-        { title: "Add A Product", url: "products-add" },
-      ],
-      // groups: PRICE_GROUPS.filter((g) => g.slug !== "retailer").map((g) => ({
-      //   title: g.label,
-      //   items: [{ title: "Products", url: `products/${g.slug}` }],
-      // })),
-    },
-    {
-      title: "Reviews",
-      url: "reviews-all",
-      icon: <Star />,
-      items: [
-        { title: "Pending", url: "reviews-pending" },
-        { title: "Approved", url: "reviews-approved" },
-        { title: "Rejected", url: "reviews-rejected" },
-        { title: "All reviews", url: "reviews-all" },
-      ],
-    },
-    // {
-    //   title: "User roles",
-    //   url: "user-roles",
-    //   icon: <UserRoundCog />,
-    //   items: [
-    //     { title: "All user roles", url: "user-roles" },
-    //     // { title: "Add a user role", url: "user-roles-add" },
-    //   ],
-    // },
-    {
-      title: "Shipping",
-      url: "delivery-locations",
-      icon: <Plane />,
-      items: [
-        { title: "Countries", url: "shipping-countries" },
-        { title: "Delivery locations", url: "shipping-delivery-locations" },
-      ],
-    },
-  ],
+function filterNavBySee(
+  items: NavItem[],
+  canSee: (item: NavItem) => boolean,
+): NavNode[] {
+  const out: NavNode[] = [];
+  for (const item of items) {
+    if (!canSee(item)) continue;
+    const children = item.children
+      ? filterNavBySee(item.children, canSee)
+      : undefined;
+    // Drop headers whose entire subtree is gated out (no empty groups).
+    if (item.children && (!children || children.length === 0)) continue;
+    out.push({
+      title: item.title,
+      url: item.url,
+      icon: NAV_ICONS[item.title],
+      children,
+    });
+  }
+  return out;
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const [mounted, setMounted] = React.useState(false)
+  const [mounted, setMounted] = React.useState(false);
+  const flavors = useFlavorStore((s) => s.flavors);
+  const fetchFlavors = useFlavorStore((s) => s.fetchFlavors);
+  const can = usePermissionsStore((s) => s.can);
+  const loaded = usePermissionsStore((s) => s.loaded);
+  // Subscribe to the permissions map so the nav re-renders when it resolves.
+  const permissions = usePermissionsStore((s) => s.permissions);
+  // Admin tab: role names resolve via the backend roles list; the tab only
+  // renders once roles are loaded so it never flashes for non-admins.
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const rolesLoaded = usePermissionsStore((s) => s.rolesLoaded);
+  const fetchRoles = usePermissionsStore((s) => s.fetchRoles);
+  const { isAdmin } = useIsAdmin();
 
   React.useEffect(() => {
-    setMounted(true)
-  }, [])
+    setMounted(true);
+  }, []);
+
+  React.useEffect(() => {
+    if (flavors.length === 0) fetchFlavors();
+  }, [flavors.length, fetchFlavors]);
+
+  React.useEffect(() => {
+    if (isAuthenticated && !rolesLoaded) fetchRoles();
+  }, [isAuthenticated, rolesLoaded, fetchRoles]);
+
+  const navMain = React.useMemo(
+    () =>
+      filterNavBySee(buildNavItems(flavors), (item) =>
+        can(item.resource, "see"),
+      ),
+    // `permissions` re-runs the filter once `fetchPermissions()` resolves.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [flavors, permissions, loaded],
+  );
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -127,7 +111,40 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </div>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        {!loaded ? (
+          <SidebarGroup>
+            <SidebarMenu>
+              {Array.from({ length: 6 }).map((_, i) => (
+                <SidebarMenuSkeleton key={i} showIcon />
+              ))}
+            </SidebarMenu>
+          </SidebarGroup>
+        ) : (
+          <>
+            <NavMain items={navMain} />
+            {rolesLoaded && isAdmin && (
+              <NavMain
+                items={[
+                  {
+                    title: "Audit Trail",
+                    url: "audit-trail",
+                    icon: <Footprints />,
+                  },
+                  {
+                    title: "Users",
+                    url: "users",
+                    icon: <UserCircle />,
+                  },
+                  {
+                    title: "Roles & Permissions",
+                    url: "roles-permissions",
+                    icon: <ShieldCheck />,
+                  },
+                ]}
+              />
+            )}
+          </>
+        )}
       </SidebarContent>
       <SidebarFooter>
         <NavUser
@@ -140,5 +157,5 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
-  )
+  );
 }

@@ -1,4 +1,4 @@
-import { CalendarDaysIcon, CalendarRange } from "lucide-react"
+import { CalendarDaysIcon, CalendarRange } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -6,32 +6,32 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "~/components/ui/select"
-import { useOrderParams } from "~/lib/useOrderParams"
-import { PERIOD_LABELS } from "~/lib/utils"
-import type { Period } from "~/types/period"
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover"
-import { Button } from "./ui/button"
-import { Label } from "./ui/label"
-import { Input } from "./ui/input"
-import { useState } from "react"
+} from "~/components/ui/select";
+import { useOrderParams } from "~/lib/useOrderParams";
+import { PERIOD_LABELS } from "~/lib/utils";
+import type { Period } from "~/types/period";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { Button } from "./ui/button";
+import { Label } from "./ui/label";
+import { Input } from "./ui/input";
+import { useState } from "react";
 
 const ORDER_PERIOD_KEYS = (Object.keys(PERIOD_LABELS) as Period[]).filter(
-  (period) => period !== "custom" && period !== "all_time"
-)
+  (period) => period !== "custom" && period !== "all_time",
+);
 
 export function OrderHeaderFilters() {
-  const { params, setParam, setCustomRange } = useOrderParams()
-  const [open, setOpen] = useState(false)
-  const [fromDate, setFromDate] = useState(params.customFrom)
-  const [toDate, setToDate] = useState(params.customTo)
+  const { params, setParam, setCustomRange } = useOrderParams();
+  const [open, setOpen] = useState(false);
+  const [fromDate, setFromDate] = useState(params.customFrom);
+  const [toDate, setToDate] = useState(params.customTo);
 
   const handleApply = () => {
     if (fromDate && toDate) {
-      setCustomRange(fromDate, toDate)
-      setOpen(false)
+      setCustomRange(fromDate, toDate);
+      setOpen(false);
     }
-  }
+  };
 
   return (
     <div className="flex items-center gap-2">
@@ -64,7 +64,7 @@ export function OrderHeaderFilters() {
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
-            <SelectItem value="all_time">All Time</SelectItem>
+            <SelectItem value="this_week"></SelectItem>
             {ORDER_PERIOD_KEYS.map((p) => (
               <SelectItem key={p} value={p}>
                 {PERIOD_LABELS[p]}
@@ -133,5 +133,5 @@ export function OrderHeaderFilters() {
         </Popover>
       )}
     </div>
-  )
+  );
 }

@@ -1,5 +1,4 @@
-import React from "react"
-import { getPageNumbers } from "../lib/utils"
+import { getPageNumbers } from "../lib/utils";
 import {
   Pagination,
   PaginationContent,
@@ -8,10 +7,10 @@ import {
   PaginationEllipsis,
   PaginationLink,
   PaginationNext,
-} from "./ui/pagination"
-import { useOrderParams } from "../lib/useOrderParams"
-import { useCustomersParams } from "../lib/useCustomersParams"
-import { Field, FieldLabel } from "./ui/field"
+} from "./ui/pagination";
+import { useOrderParams } from "../lib/useOrderParams";
+import { useCustomersParams } from "../lib/useCustomersParams";
+import { Field, FieldLabel } from "./ui/field";
 import {
   Select,
   SelectContent,
@@ -19,14 +18,16 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./ui/select"
-import { useFeedbackParams } from "../lib/useFeedbackParams"
+} from "./ui/select";
+import { useFeedbackParams } from "../lib/useFeedbackParams";
+import { useAuditParams } from "../lib/useAuditParams";
+import { useShippingParams } from "../lib/useShippingParams";
 
 type PaginationProps = {
-  totalPages: number
-  currentPage: number
-  currentTable: string
-}
+  totalPages: number;
+  currentPage: number;
+  currentTable: string;
+};
 
 const PaginationOrders = ({
   currentPage,
@@ -38,7 +39,11 @@ const PaginationOrders = ({
       ? useOrderParams()
       : currentTable === "feedback"
         ? useFeedbackParams()
-        : useCustomersParams()
+        : currentTable === "audit"
+          ? useAuditParams()
+          : currentTable === "shipping"
+            ? useShippingParams()
+            : useCustomersParams();
   return (
     <div className="">
       <Pagination>
@@ -81,8 +86,8 @@ const PaginationOrders = ({
                 <PaginationLink
                   isActive={currentPage === page}
                   onClick={(e) => {
-                    e.preventDefault()
-                    setParam("page", String(page))
+                    e.preventDefault();
+                    setParam("page", String(page));
                   }}
                   className="cursor-pointer"
                 >
@@ -95,8 +100,8 @@ const PaginationOrders = ({
           <PaginationItem>
             <PaginationNext
               onClick={(e) => {
-                e.preventDefault()
-                setParam("page", String(currentPage + 1))
+                e.preventDefault();
+                setParam("page", String(currentPage + 1));
               }}
               className={
                 currentPage === totalPages
@@ -108,7 +113,7 @@ const PaginationOrders = ({
         </PaginationContent>
       </Pagination>
     </div>
-  )
-}
+  );
+};
 
-export default PaginationOrders
+export default PaginationOrders;

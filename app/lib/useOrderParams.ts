@@ -10,10 +10,10 @@ const DEFAULT_PARAMS = {
   minPrice: "",
   maxPrice: "",
   search: "",
-  period: "all_time",
+  period: "this_week",
   customFrom: "",
   customTo: "",
-}
+};
 
 export function useOrderParams() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -38,10 +38,10 @@ export function useOrderParams() {
     periodQuery:
       period === "custom" && customFrom && customTo
         ? { from: customFrom, to: customTo }
-        : period === "all_time"
+        : period === "this_week"
           ? {}
           : { period },
-  }
+  };
 
   const setParam = (key: keyof typeof DEFAULT_PARAMS, value: string) => {
     const next = new URLSearchParams(searchParams)

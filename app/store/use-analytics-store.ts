@@ -1,73 +1,94 @@
-import { create } from "zustand"
-import { api } from "~/lib/axios"
+import { create } from "zustand";
+import { api } from "~/lib/axios";
 import type {
   RevenuePoint,
   ProductPoint,
   StatusPoint,
   Period,
   Country,
-} from "../types/period"
-import { useCustomersParams } from "../lib/useCustomersParams"
+} from "../types/period";
+import { useCustomersParams } from "../lib/useCustomersParams";
 
 interface CountryPoint {
-  country: string
-  orderCount: number
-  totalRevenue: string
+  country: string;
+  orderCount: number;
+  totalRevenue: string;
 }
-export type ChartGrouping = "date" | "month" | "hour"
+export type ChartGrouping = "date" | "month" | "hour";
 
 export interface Customer {
-  id: number
-  email: string
-  firstName: string
-  lastName: string
-  country: string
-  totalSpend: string
-  totalOrders: number
+  id: number;
+  email: string;
+  firstName: string;
+  lastName: string;
+  country: string;
+  totalSpend: string;
+  totalOrders: number;
 }
 
 interface RevenuePointCards extends RevenuePoint {}
 
+type DeliveryPointData = {
+  location: string;
+  totalRevenue: number;
+  orderCount: number;
+};
+
+interface DeliveryPoint {
+  period: string;
+  currency: string;
+  data: DeliveryPointData[];
+}
+
 interface SalesData {
-  revenueCards: RevenuePointCards[]
-  revenue: RevenuePoint[]
-  topProducts: ProductPoint[]
-  statusData: StatusPoint[]
-  orderCountry: CountryPoint[] | undefined
-  deletedOrders: string
+  revenueCards: RevenuePointCards[];
+  revenue: RevenuePoint[];
+  topProducts: ProductPoint[];
+  statusData: StatusPoint[];
+  orderCountry: CountryPoint[] | undefined;
+  deletedOrders: string;
+  deliveryLocations: DeliveryPoint;
 }
 
 interface CustomersData {
   seg: {
-    period: string
-    total: number
-    new: number
-    returning: number
-    vip: number
-  } | null
-  top: { period: string; rows: Customer[]; total: number } | null
+    period: string;
+    total: number;
+    new: number;
+    returning: number;
+    vip: number;
+  } | null;
+  top: { period: string; rows: Customer[]; total: number } | null;
 }
 
 interface AnalyticsSalesStore {
-  data: SalesData
-  isLoading: boolean
-  isRefetching: boolean
+  data: SalesData;
+  isLoading: boolean;
+  isRefetching: boolean;
 
-  fetchAll: (periodQuery: string, country: Country, pricingGroup?: string) => Promise<void>
-  refetch: (periodQuery: string, country: Country, pricingGroup?: string) => Promise<void>
+  fetchAll: (
+    periodQuery: string,
+    country: Country,
+    pricingGroup?: string,
+  ) => Promise<void>;
+  refetch: (
+    periodQuery: string,
+    country: Country,
+    pricingGroup?: string,
+  ) => Promise<void>;
 }
 
 interface AnalyticsCustomersStore {
-  data: CustomersData
-  isLoading: boolean
-  isRefetching: boolean
-  totalCount: number
+  data: CustomersData;
+  isLoading: boolean;
+  isRefetching: boolean;
+  totalCount: number;
   fetchAll: (
-    params: ReturnType<typeof useCustomersParams>["params"]
-  ) => Promise<void>
+    params: ReturnType<typeof useCustomersParams>["params"],
+  ) => Promise<void>;
   refetch: (
-    params: ReturnType<typeof useCustomersParams>["params"]
-  ) => Promise<void>
+    params: ReturnType<typeof useCustomersParams>["params"],
+  ) => Promise<void>;
 }
 
 const EMPTY: SalesData = {
@@ -77,7 +98,8 @@ const EMPTY: SalesData = {
   statusData: [],
   orderCountry: undefined,
   deletedOrders: "",
-}
+  deliveryLocations: {} as DeliveryPoint,
+};
 
 // At the top of use-analytics-store.ts — these must be MODULE-LEVEL constants
 const DEFAULT_KPI: KPI = {
@@ -86,23 +108,23 @@ const DEFAULT_KPI: KPI = {
   bounceRate: 0,
   avgEngagementTime: 0,
   engagedSessions: 0,
-}
+};
 
 const DEFAULT_NVR: NewVsReturning = {
   new: 0,
   returning: 0,
   newPct: 0,
   returningPct: 0,
-}
+};
 
 const DEFAULT_FUNNEL: Funnel = {
   visited: 0,
   cart: 0,
   checkout: 0,
   purchased: 0,
-}
+};
 
-const EMPTY_ARRAY: never[] = [] // one stable empty array for everything
+const EMPTY_ARRAY: never[] = []; // one stable empty array for everything
 
 export const useAnalyticsSalesStore = create<AnalyticsSalesStore>((set) => ({
   data: EMPTY,
@@ -110,22 +132,26 @@ export const useAnalyticsSalesStore = create<AnalyticsSalesStore>((set) => ({
   isRefetching: false,
 
   fetchAll: async (periodQuery, country = "GHS", pricingGroup) => {
-    set({ isLoading: true })
+    set({ isLoading: true });
     try {
-      const curr = country
-      const pgParam = pricingGroup ? `&pricingGroup=${pricingGroup}` : ""
-      const [rev, products, status, orderCountry] = await Promise.all([
-        api.get(`/analytics/sales/revenue?${periodQuery}&currency=${curr}${pgParam}`),
-        api.get(
-          `/analytics/sales/top-products?${periodQuery}&currency=${curr}${pgParam}`
-        ),
-        api.get(
-          `/analytics/sales/order-status?${periodQuery}&currency=${curr}${pgParam}`
-        ),
-        api.get(
-          `/analytics/sales/order-country?${periodQuery}&currency=${curr}${pgParam}`
-        ),
-      ])
+      const curr = country;
+      const pgParam = pricingGroup ? `&pricingGroup=${pricingGroup}` : "";
+      const [rev, products, status, orderCountry, topDeliveryLocations] =
+        await Promise.all([
+          api.get(
+            `/analytics/sales/revenue?${periodQuery}&currency=${curr}${pgParam}`,
+          ),
+          api.get(
+            `/analytics/sales/top-products?${periodQuery}&currency=${curr}${pgParam}`,
+          ),
+          api.get(
+            `/analytics/sales/order-status?${periodQuery}&currency=${curr}${pgParam}`,
+          ),
+          api.get(`/analytics/sales/order-country?${periodQuery}`),
+          api.get(
+            `/analytics/sales/delivery-locations?${periodQuery}&currency=${curr}${pgParam}`,
+          ),
+        ]);
       set({
         data: {
           revenueCards: rev.data.data,
@@ -134,35 +160,44 @@ export const useAnalyticsSalesStore = create<AnalyticsSalesStore>((set) => ({
           statusData: status.data.data,
           orderCountry: orderCountry.data.data,
           deletedOrders: status.data.deletedOrders?.[0]?.count ?? "",
+          deliveryLocations: topDeliveryLocations.data,
         },
         isLoading: false,
-      })
+      });
     } catch (e) {
-      console.error("sales analytics fetch error:", e)
-      set({ isLoading: false })
+      console.error("sales analytics fetch error:", e);
+      set({ isLoading: false });
     }
   },
 
   refetch: async (periodQuery, country, pricingGroup) => {
-    set({ isRefetching: true })
+    set({ isRefetching: true });
     try {
-      const curr = country
-      const pgParam = pricingGroup ? `&pricingGroup=${pricingGroup}` : ""
-      const [revcards, rev, products, status, orderCountry] = await Promise.all(
-        [
-          api.get(`/analytics/sales/revenue?${periodQuery}${pgParam}`),
-          api.get(
-            `/analytics/sales/revenue?${periodQuery}${country !== "all" ? `&currency=${curr}` : ""}${pgParam}`
-          ),
-          api.get(
-            `/analytics/sales/top-products?${periodQuery}${country !== "all" ? `&currency=${curr}` : ""}${pgParam}`
-          ),
-          api.get(
-            `/analytics/sales/order-status?${periodQuery}${country !== "all" ? `&currency=${curr}` : ""}${pgParam}`
-          ),
-          api.get(`/analytics/sales/order-country?${periodQuery}${pgParam}`),
-        ]
-      )
+      const curr = country;
+      const pgParam = pricingGroup ? `&pricingGroup=${pricingGroup}` : "";
+      const [
+        revcards,
+        rev,
+        products,
+        status,
+        orderCountry,
+        topDeliveryLocations,
+      ] = await Promise.all([
+        api.get(`/analytics/sales/revenue?${periodQuery}${pgParam}`),
+        api.get(
+          `/analytics/sales/revenue?${periodQuery}${country !== "all" ? `&currency=${curr}` : ""}${pgParam}`,
+        ),
+        api.get(
+          `/analytics/sales/top-products?${periodQuery}${country !== "all" ? `&currency=${curr}` : ""}${pgParam}`,
+        ),
+        api.get(
+          `/analytics/sales/order-status?${periodQuery}${country !== "all" ? `&currency=${curr}` : ""}${pgParam}`,
+        ),
+        api.get(`/analytics/sales/order-country?${periodQuery}${pgParam}`),
+        api.get(
+          `/analytics/sales/delivery-locations?${periodQuery}${country !== "all" ? `&currency=${curr}` : ""}${pgParam}`,
+        ),
+      ]);
       set({
         data: {
           revenue: rev.data.data,
@@ -171,15 +206,16 @@ export const useAnalyticsSalesStore = create<AnalyticsSalesStore>((set) => ({
           statusData: status.data.data,
           orderCountry: orderCountry.data.data,
           deletedOrders: status.data.deletedOrders?.[0]?.count ?? "",
+          deliveryLocations: topDeliveryLocations.data,
         },
         isRefetching: false,
-      })
+      });
     } catch (e) {
-      console.error("sales analytics refetch error:", e)
-      set({ isRefetching: false })
+      console.error("sales analytics refetch error:", e);
+      set({ isRefetching: false });
     }
   },
-}))
+}));
 
 export const useAnalyticsCustomersStore = create<AnalyticsCustomersStore>(
   (set) => ({
@@ -189,9 +225,9 @@ export const useAnalyticsCustomersStore = create<AnalyticsCustomersStore>(
     isRefetching: false,
 
     fetchAll: async (params) => {
-      set({ isLoading: true })
+      set({ isLoading: true });
       try {
-        const { periodQuery, ...restParams } = params
+        const { periodQuery, ...restParams } = params;
         // const curr = country || "GHS"
         const [seg, top] = await Promise.all([
           api.get(`/analytics/customers/segments`, {
@@ -200,7 +236,7 @@ export const useAnalyticsCustomersStore = create<AnalyticsCustomersStore>(
           api.get(`/analytics/customers/top`, {
             params: { ...restParams, ...periodQuery },
           }),
-        ])
+        ]);
 
         set({
           data: {
@@ -209,17 +245,17 @@ export const useAnalyticsCustomersStore = create<AnalyticsCustomersStore>(
           },
           totalCount: top.data.total,
           isLoading: false,
-        })
+        });
       } catch (e) {
-        console.error("sales analytics fetch error:", e)
-        set({ isLoading: false })
+        console.error("sales analytics fetch error:", e);
+        set({ isLoading: false });
       }
     },
 
     refetch: async (params) => {
-      set({ isRefetching: true })
+      set({ isRefetching: true });
       try {
-        const { periodQuery, country, ...restParams } = params
+        const { periodQuery, country, ...restParams } = params;
         // const curr = country || "GHS"
         const [seg, top] = await Promise.all([
           api.get(`/analytics/customers/segments`, {
@@ -228,7 +264,7 @@ export const useAnalyticsCustomersStore = create<AnalyticsCustomersStore>(
           api.get(`/analytics/customers/top`, {
             params: { ...restParams, country, ...periodQuery },
           }),
-        ])
+        ]);
         set({
           data: {
             seg: seg.data,
@@ -237,30 +273,30 @@ export const useAnalyticsCustomersStore = create<AnalyticsCustomersStore>(
           totalCount: top.data.total,
           isLoading: false,
           isRefetching: false,
-        })
+        });
       } catch (e) {
-        console.error("sales analytics refetch error:", e)
-        set({ isRefetching: false })
+        console.error("sales analytics refetch error:", e);
+        set({ isRefetching: false });
       }
     },
-  })
-)
+  }),
+);
 
 type PeriodKey =
   | "revPeriod"
   | "countryPeriod"
   | "productPeriod"
   | "statusPeriod"
-  | "avgPeriod"
+  | "avgPeriod";
 
 interface AnalyticsStore {
-  revPeriod: Period
-  countryPeriod: Period
-  productPeriod: Period
-  statusPeriod: Period
-  avgPeriod: Period
-  setPeriod: (key: PeriodKey, value: Period) => void
-  setAllPeriods: (periods: Partial<Record<PeriodKey, Period>>) => void
+  revPeriod: Period;
+  countryPeriod: Period;
+  productPeriod: Period;
+  statusPeriod: Period;
+  avgPeriod: Period;
+  setPeriod: (key: PeriodKey, value: Period) => void;
+  setAllPeriods: (periods: Partial<Record<PeriodKey, Period>>) => void;
 }
 
 export const useAnalyticsStore = create<AnalyticsStore>((set) => ({
@@ -271,89 +307,78 @@ export const useAnalyticsStore = create<AnalyticsStore>((set) => ({
   avgPeriod: "this_month",
   setPeriod: (key, value) => set((state) => ({ ...state, [key]: value })),
   setAllPeriods: (periods) => set((state) => ({ ...state, ...periods })),
-}))
+}));
 
 export interface KPI {
-  sessions: number
-  uniqueVisitors: number
-  bounceRate: number
-  avgEngagementTime: number
-  engagedSessions: number
+  sessions: number;
+  uniqueVisitors: number;
+  bounceRate: number;
+  avgEngagementTime: number;
+  engagedSessions: number;
 }
 
 export interface DailyChartPoint {
-  date: string
-  desktop: number
-  mobile: number
+  date: string;
+  desktop: number;
+  mobile: number;
 }
 
 export interface NewVsReturning {
-  new: number
-  returning: number
-  newPct: number
-  returningPct: number
+  new: number;
+  returning: number;
+  newPct: number;
+  returningPct: number;
 }
 
 export interface TrafficSource {
-  source: string
-  sessions: number
+  source: string;
+  sessions: number;
 }
 
 export interface Funnel {
-  visited: number
-  cart: number
-  checkout: number
-  purchased: number
+  visited: number;
+  cart: number;
+  checkout: number;
+  purchased: number;
 }
 
 export interface RadialPoint {
-  month: string
-  sessions: number
-  users: number
+  month: string;
+  sessions: number;
+  users: number;
 }
 
-// export type Period =
-//   | "today"
-//   | "yesterday"
-//   | "this_week"
-//   | "last_week"
-//   | "this_month"
-//   | "last_month"
-//   | "this_year"
-//   | "last_year"
-//   | "custom"
-
 export interface AnalyticsResponse {
-  period: Period
-  chartGrouping: ChartGrouping
-  kpi: KPI
-  dailyChartData: DailyChartPoint[]
-  newVsReturning: NewVsReturning
-  trafficSources: TrafficSource[]
-  funnel: Funnel
-  radialData: RadialPoint[]
+  period: Period;
+  chartGrouping: ChartGrouping;
+  kpi: KPI;
+  dailyChartData: DailyChartPoint[];
+  newVsReturning: NewVsReturning;
+  trafficSources: TrafficSource[];
+  funnel: Funnel;
+  radialData: RadialPoint[];
 }
 
 interface AnalyticsState {
   // Data
-  data: AnalyticsResponse | null
-  period: Period
-  customFrom: string | null
-  customTo: string | null
+  data: AnalyticsResponse | null;
+  period: Period;
+  customFrom: string | null;
+  customTo: string | null;
 
   // UI state
-  loading: boolean
-  error: string | null
+  loading: boolean;
+  error: string | null;
 
   // Actions
-  setPeriod: (period: Period) => void
-  setCustomRange: (from: string, to: string) => void
+  setPeriod: (period: Period) => void;
+  setCustomRange: (from: string, to: string) => void;
   fetchAnalytics: (
     period?: string,
     customFrom?: string,
-    customTo?: string
-  ) => Promise<void>
-  reset: () => void
+    customTo?: string,
+  ) => Promise<void>;
+  reset: () => void;
 }
 
 export const useWebAnalyticsStore = create<AnalyticsState>((set, get) => ({
@@ -366,36 +391,36 @@ export const useWebAnalyticsStore = create<AnalyticsState>((set, get) => ({
   error: null,
 
   setPeriod: (period) => {
-    set({ period })
-    get().fetchAnalytics()
+    set({ period });
+    get().fetchAnalytics();
   },
 
   setCustomRange: (from, to) => {
-    set({ period: "custom", customFrom: from, customTo: to })
-    get().fetchAnalytics()
+    set({ period: "custom", customFrom: from, customTo: to });
+    get().fetchAnalytics();
   },
 
   fetchAnalytics: async (
     period?: string,
     customFrom?: string,
-    customTo?: string
+    customTo?: string,
   ) => {
-    set({ loading: true, error: null })
+    set({ loading: true, error: null });
 
     try {
-      const params = new URLSearchParams({ period: period ?? "all_time" })
+      const params = new URLSearchParams({ period: period ?? "this_week" });
       if (period === "custom" && customFrom && customTo) {
-        params.set("from", customFrom)
-        params.set("to", customTo)
+        params.set("from", customFrom);
+        params.set("to", customTo);
       }
 
-      const res = await api.get(`/analytics/website?${params.toString()}`)
-      set({ data: res.data, loading: false })
+      const res = await api.get(`/analytics/website?${params.toString()}`);
+      set({ data: res.data, loading: false });
     } catch (err: any) {
       set({
         error: err?.message ?? "Failed to load analytics data",
         loading: false,
-      })
+      });
     }
   },
 
@@ -408,21 +433,21 @@ export const useWebAnalyticsStore = create<AnalyticsState>((set, get) => ({
       loading: false,
       error: null,
     }),
-}))
+}));
 
-export const selectKPI = (s: AnalyticsState) => s.data?.kpi ?? DEFAULT_KPI
+export const selectKPI = (s: AnalyticsState) => s.data?.kpi ?? DEFAULT_KPI;
 export const selectDailyChart = (s: AnalyticsState) =>
-  s.data?.dailyChartData ?? EMPTY_ARRAY
+  s.data?.dailyChartData ?? EMPTY_ARRAY;
 export const selectNewVsReturn = (s: AnalyticsState) =>
-  s.data?.newVsReturning ?? DEFAULT_NVR
+  s.data?.newVsReturning ?? DEFAULT_NVR;
 export const selectTraffic = (s: AnalyticsState) =>
-  s.data?.trafficSources ?? EMPTY_ARRAY
+  s.data?.trafficSources ?? EMPTY_ARRAY;
 export const selectFunnel = (s: AnalyticsState) =>
-  s.data?.funnel ?? DEFAULT_FUNNEL
+  s.data?.funnel ?? DEFAULT_FUNNEL;
 export const selectRadial = (s: AnalyticsState) =>
-  s.data?.radialData ?? EMPTY_ARRAY
+  s.data?.radialData ?? EMPTY_ARRAY;
 // export const selectPeriod = (s: AnalyticsState) => s.period
-export const selectLoading = (s: AnalyticsState) => s.loading
-export const selectError = (s: AnalyticsState) => s.error
+export const selectLoading = (s: AnalyticsState) => s.loading;
+export const selectError = (s: AnalyticsState) => s.error;
 export const selectChartGrouping = (s: AnalyticsState) =>
-  s.data?.chartGrouping ?? ("date" as ChartGrouping)
+  s.data?.chartGrouping ?? ("date" as ChartGrouping);

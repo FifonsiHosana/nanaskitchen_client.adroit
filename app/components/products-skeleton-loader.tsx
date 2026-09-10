@@ -40,7 +40,7 @@ import {Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Table
     </TableRow>
   )
 }
-export function ProductsTableSkeleton({ rows = 4 }: { rows?: number }) {
+export function ProductsTableSkeleton({ rows = 7 }: { rows?: number }) {
   return (
     <Table className="">
       <TableCaption>products.</TableCaption>

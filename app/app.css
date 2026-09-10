@@ -46,6 +46,17 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+  --color-status-complete: var(--status-completed);
+  --color-status-delivered: var(--status-delivered);
+  --color-status-delivered-text: var(--status-delivered-text);
+  --color-status-complete-text: var(--status-completed-text);
+  --color-status-pending: var(--status-pending);
+  --color-status-pending-text: var(--status-pending-text);
+
+  --color-new: var(--new);
+  --color-delivered-text: var(--status-delivered-text);
+  --color-stable: var(--status-completed);
+  --color-stable-text: var(--status-completed-text);
 }
 
 :root {
@@ -67,19 +78,25 @@
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
-  /* --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0); */
+  --new: oklch(0.72 0.19 150);
 
-  --chart-1: oklch(0.7 0.14 160); /* #2eb88a */
-  --chart-1: oklch(0.7 0.14 160); /* #2eb88a */
-  --chart-2: oklch(0.6 0.16 255); /* #2662d9 */
+  --chart-1: oklch(64% 0.16 81.3); /* Ghana gold — light mode */
+  --chart-2: oklch(48% 0.13 255.1); /* US navy — light mode */
   --chart-3: oklch(0.65 0.18 300); /* #af57db */
   --chart-4: oklch(0.7 0.16 50); /* #e88c30 */
   --chart-5: oklch(0.65 0.2 350); /* #e23670 */
   --chart-6: oklch(0.87 0 0);
+
+  --chart-yes: oklch(0.55 0.12 155); /* Deep Mint Green */
+  --chart-no: oklch(0.55 0.18 27); /* Coral Red */
+
+  /* Star Ratings: 1 to 5 Stars */
+  --chart-star-1: oklch(0.68 0.16 65); /* 1-Star: Muted Crimson */
+  --chart-star-2: oklch(0.58 0.18 27); /* 2-Star: Soft Amber */
+  --chart-star-3: oklch(0.75 0.02 240); /* 3-Star: Neutral Slate Gray */
+  --chart-star-4: oklch(0.65 0.14 142); /* 4-Star: Medium Sage Green */
+  --chart-star-5: oklch(0.52 0.15 152); /* 5-Star: Rich Emerald Green */
+
   --radius: 0.625rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
@@ -89,12 +106,48 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
-  --status-pending: 50, 100%, 78%;
-  --status-completed: 138, 71%, 77%;
-  --status-delivered: 26, 100%, 80%;
+  --visible-all: oklch(0.7 0.12 183)
+    /* --status-pending: oklch(0.77 0.16 70);
+  --status-completed: oklch(0.55 0.22 263);
+  --status-delivered: oklch(0.63 0.17 149); */
+    --status-pending-text: oklch(48% 0.18 40.7);
+  --status-pending: oklch(85% 0.08 77.6);
+
+  --status-completed-text: oklch(40% 0.16 258.5);
+  --status-completed: oklch(85% 0.05 248);
+
+  --status-delivered-text: oklch(42% 0.15 150.5);
+  --status-delivered: oklch(85% 0.08 160.8);
+
   --out-of-stock: oklch(0.64 0.21 25);
   --status-approve: oklch(0.63 0.17 149);
   --status-pending-review: oklch(0.8 0.16 86);
+
+  /* Marketing & Acquisition Channels */
+  --social-media: oklch(0.65 0.18 240); /* Vibrant Digital Blue */
+  --social-media-bg: oklch(0.93 0.04 240); /* Soft Blue Tint */
+
+  --word-of-mouth: oklch(0.62 0.15 180); /* Approachable Teal */
+  --word-of-mouth-bg: oklch(0.93 0.03 180); /* Soft Teal Tint */
+
+  --event-functions: oklch(0.68 0.19 50); /* Energetic Warm Coral */
+  --event-functions-bg: oklch(0.94 0.04 50); /* Soft Coral Tint */
+
+  /* "What They Like About Us" Metrics */
+  --price: oklch(0.65 0.18 140); /* Value Emerald Green */
+  --price-bg: oklch(0.94 0.04 140); /* Soft Green Tint */
+
+  --authenticity: oklch(0.55 0.16 35); /* Grounded Terracotta */
+  --authenticity-bg: oklch(0.92 0.03 35); /* Soft Terracotta Tint */
+
+  --taste: oklch(0.6 0.22 28); /* Appetite-Stimulating Crimson */
+  --taste-bg: oklch(0.92 0.04 28); /* Soft Crimson Tint */
+
+  --quality: oklch(0.4 0.08 240); /* Trustworthy Deep Navy */
+  --quality-bg: oklch(0.9 0.02 240); /* Soft Navy/Grey Tint */
+
+  --pacakaging: oklch(0.86 0.17 92);
+  --packaging-bg: oklch(0.97 0.07 103);
 }
 
 .dark {
@@ -104,9 +157,15 @@
   /* --primary: 220 60% 65%; */
   --danger: 0 60% 65%;
   /* --violet: 270 50% 70%; */
-  --status-pending: 45.4 93.4% 47.5%;
-  --status-completed: 142.4 71.8% 29.2%;
-  --status-delivered: 17.5 88.3% 40.4%;
+  --status-pending-text: oklch(85% 0.15 77.6);
+  --status-pending: oklch(40% 0.1 77.6);
+
+  --status-completed-text: oklch(82% 0.12 248);
+  --status-completed: oklch(40% 0.08 248);
+
+  --status-delivered-text: oklch(84% 0.14 160.8);
+  --status-delivered: oklch(40% 0.09 160.8);
+
   --out-of-stock: oklch(0.58 0.22 27);
 
   --background: oklch(0.145 0 0);
@@ -127,11 +186,20 @@
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
-  --chart-1: oklch(52.86% 0.18984 26.685);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
+  --new: oklch(0.63 0.17 149);
+  --chart-1: oklch(75.8% 0.156 81.3);
+  --chart-2: oklch(42.3% 0.111 255.1);
+
+  --chart-yes: oklch(0.68 0.14 155); /* Vibrant Mint */
+  --chart-no: oklch(0.65 0.2 27); /* Bright Coral */
+
+  /* Star Ratings: 1 to 5 Stars */
+  --chart-star-1: oklch(0.75 0.18 65); /* 1-Star: Vibrant Crimson */
+  --chart-star-2: oklch(0.65 0.2 27); /* 2-Star: Warm Gold/Amber */
+  --chart-star-3: oklch(0.6 0.02 240); /* 3-Star: Cool Charcoal Gray */
+  --chart-star-4: oklch(0.72 0.16 142); /* 4-Star: Bright Sage */
+  --chart-star-5: oklch(0.68 0.16 152);
+
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.488 0.243 264.376);
@@ -140,6 +208,31 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+
+  --social-media: oklch(0.72 0.15 240); /* Lighter, Glowing Blue */
+  --social-media-bg: oklch(0.28 0.08 240); /* Deep Translucent Blue */
+
+  --word-of-mouth: oklch(0.7 0.12 180); /* Lighter Neon Teal */
+  --word-of-mouth-bg: oklch(0.26 0.06 180); /* Deep Teal Base */
+
+  --event-functions: oklch(0.74 0.16 50); /* Vibrant Soft Orange/Coral */
+  --event-functions-bg: oklch(0.28 0.08 50); /* Muted Burnt Orange Base */
+
+  /* "What They Like About Us" Metrics */
+  --price: oklch(0.73 0.15 140); /* Vibrant Value Green */
+  --price-bg: oklch(0.26 0.07 140); /* Deep Forest Base */
+
+  --authenticity: oklch(0.68 0.13 35); /* Earthy Warm Clay */
+  --authenticity-bg: oklch(0.25 0.06 35); /* Dark Clay Base */
+
+  --taste: oklch(0.68 0.19 28); /* Glowing Crimson Red */
+  --taste-bg: oklch(0.25 0.08 28); /* Wine Red Base */
+
+  --quality: oklch(0.75 0.05 240); /* Clean Slate Blue */
+  --quality-bg: oklch(0.25 0.03 240); /* Dark Navy Base */
+
+  --pacakaging: oklch(0.86 0.17 92);
+  --packaging-bg: oklch(0.97 0.07 103);
 }
 
 @layer base {

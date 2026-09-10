@@ -1,7 +1,7 @@
-import { useState } from "react"
-import { toast } from "sonner"
-import { Plus } from "lucide-react"
-import { Button } from "./ui/button"
+import { useState } from "react";
+import { toast } from "sonner";
+import { Plus } from "lucide-react";
+import { Button } from "./ui/button";
 import {
   Dialog,
   DialogClose,
@@ -10,39 +10,45 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "./ui/dialog"
-import { Field, FieldGroup, FieldLabel } from "./ui/field"
-import { Input } from "./ui/input"
-import { useCatalogStore } from "../store/use_catalog_store"
+} from "./ui/dialog";
+import { Field, FieldGroup, FieldLabel } from "./ui/field";
+import { Input } from "./ui/input";
+import { usePermission } from "../hooks/use-permission";
+import { useCatalogStore } from "../store/use_catalog_store";
 
 export function AddVariantDialog() {
-  const [open, setOpen] = useState(false)
-  const [variantName, setVariantName] = useState("")
-  const [titleTag, setTitleTag] = useState("")
-  const [submitting, setSubmitting] = useState(false)
+  const [open, setOpen] = useState(false);
+  const [variantName, setVariantName] = useState("");
+  const [titleTag, setTitleTag] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  const { createVariant } = useCatalogStore()
+  const { createVariant } = useCatalogStore();
+  // POST /products/catalog/variants requires products/edit — omit the
+  // trigger entirely (never flash it) until permissions resolve.
+  const { allowed: canEdit, loaded } = usePermission("products", "edit");
 
   async function handleSubmit() {
     if (!variantName.trim()) {
-      toast.error("Variant name is required")
-      return
+      toast.error("Variant name is required");
+      return;
     }
-    setSubmitting(true)
+    setSubmitting(true);
     const ok = await createVariant({
       variantName: variantName.trim(),
       titleTag,
-    })
-    setSubmitting(false)
+    });
+    setSubmitting(false);
     if (ok) {
-      toast.success("Variant created")
-      setVariantName("")
-      setTitleTag("")
-      setOpen(false)
+      toast.success("Variant created");
+      setVariantName("");
+      setTitleTag("");
+      setOpen(false);
     } else {
-      toast.error("Failed to create variant")
+      toast.error("Failed to create variant");
     }
   }
+
+  if (!loaded || !canEdit) return null;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -77,15 +83,19 @@ export function AddVariantDialog() {
         </FieldGroup>
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="outline" type="button">
+            <Button variant="destructive" type="button">
               Cancel
             </Button>
           </DialogClose>
-          <Button onClick={handleSubmit} disabled={submitting}>
+          <Button
+            onClick={handleSubmit}
+            // className="bg-new"
+            disabled={submitting}
+          >
             {submitting ? "Saving..." : "Create variant"}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

@@ -17,14 +17,14 @@
 //   )
 // }
 
-import * as React from "react"
-import { cn } from "~/lib/utils"
+import * as React from "react";
+import { cn } from "~/lib/utils";
 
 const Table = React.forwardRef<
   HTMLTableElement,
   React.HTMLAttributes<HTMLTableElement> & {
-    noWrapper?: boolean
-    divClassname?: string
+    noWrapper?: boolean;
+    divClassname?: string;
   }
 >(({ className, noWrapper, divClassname, ...props }, ref) => {
   if (noWrapper) {
@@ -34,7 +34,7 @@ const Table = React.forwardRef<
         className={cn("w-full caption-bottom text-sm", className)}
         {...props}
       />
-    )
+    );
   }
 
   return (
@@ -45,9 +45,9 @@ const Table = React.forwardRef<
         {...props}
       />
     </div>
-  )
-})
-Table.displayName = "Table"
+  );
+});
+Table.displayName = "Table";
 
 function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
   return (
@@ -56,7 +56,7 @@ function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
       className={cn("[&_tr]:border-b", className)}
       {...props}
     />
-  )
+  );
 }
 
 function TableBody({ className, ...props }: React.ComponentProps<"tbody">) {
@@ -66,7 +66,7 @@ function TableBody({ className, ...props }: React.ComponentProps<"tbody">) {
       className={cn("[&_tr:last-child]:border-0", className)}
       {...props}
     />
-  )
+  );
 }
 
 function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
@@ -75,11 +75,11 @@ function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
       data-slot="table-footer"
       className={cn(
         "border-t bg-muted/50 font-medium [&>tr]:last:border-b-0",
-        className
+        className,
       )}
       {...props}
     />
-  )
+  );
 }
 
 function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
@@ -87,12 +87,12 @@ function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
     <tr
       data-slot="table-row"
       className={cn(
-        "border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted",
-        className
+        "border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-blue-500/10 data-[state=selected]:hover:bg-blue-500/10",
+        className,
       )}
       {...props}
     />
-  )
+  );
 }
 
 function TableHead({ className, ...props }: React.ComponentProps<"th">) {
@@ -101,11 +101,11 @@ function TableHead({ className, ...props }: React.ComponentProps<"th">) {
       data-slot="table-head"
       className={cn(
         "h-10 px-2 text-left align-middle font-medium whitespace-nowrap text-foreground [&:has([role=checkbox])]:pr-0",
-        className
+        className,
       )}
       {...props}
     />
-  )
+  );
 }
 
 function TableCell({ className, ...props }: React.ComponentProps<"td">) {
@@ -114,11 +114,11 @@ function TableCell({ className, ...props }: React.ComponentProps<"td">) {
       data-slot="table-cell"
       className={cn(
         "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0",
-        className
+        className,
       )}
       {...props}
     />
-  )
+  );
 }
 
 function TableCaption({
@@ -131,7 +131,7 @@ function TableCaption({
       className={cn("mt-4 text-sm text-muted-foreground", className)}
       {...props}
     />
-  )
+  );
 }
 
 export {
@@ -143,4 +143,4 @@ export {
   TableRow,
   TableCell,
   TableCaption,
-}
+};

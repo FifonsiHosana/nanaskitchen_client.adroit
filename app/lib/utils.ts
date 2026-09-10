@@ -1,23 +1,34 @@
-import { clsx, type ClassValue } from "clsx"
-import type { SyntheticEvent } from "react"
-import { twMerge } from "tailwind-merge"
-import type { Country, Period } from "../types/period"
-import type { DataType } from "../types"
-import { toast } from "sonner"
+import { clsx, type ClassValue } from "clsx";
+import type { SyntheticEvent } from "react";
+import { twMerge } from "tailwind-merge";
+import type { Country, Period } from "../types/period";
+import type { DataType } from "../types";
+import { toast } from "sonner";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
-export const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
+export const STATUS_CONFIG: Record<
+  string,
+  { label: string; color: string; textColor: string }
+> = {
   awaiting_payment: {
-    label: "Pending", //changed awaiting payment to pending
-    color: "hsl(var(--status-pending))",
+    label: "Pending",
+    color: "var(--status-pending)",
+    textColor: "var(--status-pending-text)",
   },
-  completed: { label: "Completed", color: "hsl(var(--status-completed))" },
-  delivered: { label: "Delivered", color: "hsl(var(--status-delivered))" },
-  trash: { label: "Trashed", color: "var(--out-of-stock)" },
-}
+  completed: {
+    label: "Paid",
+    color: "var(--status-completed)",
+    textColor: "var(--status-completed-text)",
+  },
+  delivered: {
+    label: "Delivered",
+    color: "var(--status-delivered)",
+    textColor: "var(--status-delivered-text)",
+  },
+};
 
 export const CURRENCY_SYMBOLS: Record<string, string> = {
   GHS: "₵",
@@ -34,29 +45,29 @@ export const CURRENCY_SYMBOLS: Record<string, string> = {
   IT: "€",
   ES: "€",
   NL: "€",
-}
+};
 
 export const addCurrencySymbol = (currency: string | null, total: string) => {
-  if (!currency) return total
-  const symbol = CURRENCY_SYMBOLS[currency] ?? ""
-  return `${symbol}${total}`
-}
+  if (!currency) return total;
+  const symbol = CURRENCY_SYMBOLS[currency] ?? "";
+  return `${symbol}${total}`;
+};
 
 export const getPageNumbers = (currentPage: number, totalPages: number) => {
-  const delta = 2
-  const pages: (number | "ellipsis")[] = []
+  const delta = 2;
+  const pages: (number | "ellipsis")[] = [];
 
-  const left = Math.max(2, currentPage - delta)
-  const right = Math.min(totalPages - 1, currentPage + delta)
+  const left = Math.max(2, currentPage - delta);
+  const right = Math.min(totalPages - 1, currentPage + delta);
 
-  pages.push(1)
-  if (left > 2) pages.push("ellipsis")
-  for (let i = left; i <= right; i++) pages.push(i)
-  if (right < totalPages - 1) pages.push("ellipsis")
-  if (totalPages > 1) pages.push(totalPages)
+  pages.push(1);
+  if (left > 2) pages.push("ellipsis");
+  for (let i = left; i <= right; i++) pages.push(i);
+  if (right < totalPages - 1) pages.push("ellipsis");
+  if (totalPages > 1) pages.push(totalPages);
 
-  return pages
-}
+  return pages;
+};
 
 export const PERIOD_LABELS: Record<Period, string> = {
   today: "Today",
@@ -67,24 +78,24 @@ export const PERIOD_LABELS: Record<Period, string> = {
   last_year: "Last Year",
   all_time: "All Time",
   custom: "Custom Range",
-}
+};
 
 export const COUNTRY_LABELS: Record<Country, string> = {
   EUR: "Europe",
   GHS: "Ghana",
   USD: "USA",
   all: "All Countries",
-}
+};
 export const COUNTRY_LABELS_REVERSE = {
   EUR: "EUR",
   GHS: "GHS",
   USD: " USD",
-}
+};
 export const COUNT = {
   EUR: "EUR",
   GHS: "GHS",
   USD: " USD",
-}
+};
 
 // export const user = localStorage.getItem("userInfo")
 
@@ -93,7 +104,7 @@ export const STATUS_COLORS: Record<string, string> = {
   awaiting_payment: "hsl(var(--status-pending))",
   completed: "hsl(var(--status-completed))",
   trash: "",
-}
+};
 
 export const PIE_COLORS = [
   "#4ade80",
@@ -101,15 +112,15 @@ export const PIE_COLORS = [
   "#fb923c",
   "#f87171",
   "#a78bfa",
-]
+];
 
 export const fmt = (n: string | number) =>
-  Number(n).toLocaleString("en-US", { maximumFractionDigits: 0 })
+  Number(n).toLocaleString("en-US", { maximumFractionDigits: 0 });
 
 export const shortDate = (d: string) => {
-  const parts = d.split("-")
-  return parts.length === 2 ? d : `${parts[1]}/${parts[2]}`
-}
+  const parts = d.split("-");
+  return parts.length === 2 ? d : `${parts[1]}/${parts[2]}`;
+};
 
 export const CHART_COLORS = {
   blue: "#3b82f6",
@@ -120,7 +131,7 @@ export const CHART_COLORS = {
   lime: "#84cc16",
   indigo: "#6366f1",
   amber: "#f59e0b",
-} as const
+} as const;
 
 // ordered palette for sequential use (charts with multiple series)
 export const CHART_PALETTE = [
@@ -132,7 +143,7 @@ export const CHART_PALETTE = [
   CHART_COLORS.lime,
   CHART_COLORS.indigo,
   CHART_COLORS.amber,
-]
+];
 
 // shadcn ChartConfig format
 export const chartConfig = {
@@ -144,7 +155,7 @@ export const chartConfig = {
   lime: { label: "Lime", color: CHART_COLORS.lime },
   indigo: { label: "Indigo", color: CHART_COLORS.indigo },
   amber: { label: "Amber", color: CHART_COLORS.amber },
-}
+};
 
 // semantic assignments — use these instead of raw colors for consistency
 export const SEMANTIC_COLORS = {
@@ -161,35 +172,54 @@ export const SEMANTIC_COLORS = {
   GH: CHART_COLORS.green,
   US: CHART_COLORS.blue,
   EU: CHART_COLORS.violet,
-}
+};
 
 export const dateNormalize = (dateString: string) => {
   // const dateString = "2023-03-16";
 
   try {
-    const dateObj = new Date(dateString)
+    const dateObj = new Date(dateString);
 
     if (isNaN(dateObj.getTime())) {
-      throw new Error("Invalid date format")
+      throw new Error("Invalid date format");
     }
     const normalDate = dateObj.toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
       day: "numeric",
-    })
-    return normalDate
+    });
+    return normalDate;
   } catch (error) {
-    console.log(error)
-    return dateString
+    console.log(error);
+    return dateString;
   }
-}
+};
 
 export const handleCopy = async (selectedOrder: string, item: string) => {
   try {
-    await navigator.clipboard.writeText(selectedOrder)
-    toast.info(`Copied ${item}`)
+    await navigator.clipboard.writeText(selectedOrder);
+    toast.info(`Copied ${item}`);
   } catch (err) {
-    console.error("Failed to copy:", err)
-    toast.error(`Failed to copy:{err}`)
+    console.error("Failed to copy:", err);
+    toast.error(`Failed to copy:{err}`);
   }
+};
+export const CURRENCY_COLORS: Record<string, string> = {
+  GHS: "var(--chart-1)",
+  USD: "var(--chart-2)",
+  Unknown: "#a3a3a3",
+};
+
+export function capitalizeFirstOnly(str: string) {
+  if (!str) return "";
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+}
+
+export function capitalizeWords(str: string) {
+  if (!str) return "";
+  return str
+    .toLowerCase()
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
 }

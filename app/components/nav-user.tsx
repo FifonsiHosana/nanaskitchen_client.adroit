@@ -1,4 +1,4 @@
-import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -7,13 +7,13 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu"
+} from "~/components/ui/dropdown-menu";
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "~/components/ui/sidebar"
+} from "~/components/ui/sidebar";
 import {
   ChevronsUpDownIcon,
   SparklesIcon,
@@ -25,75 +25,84 @@ import {
   LockOpenIcon,
   LoaderIcon,
   CogIcon,
-} from "lucide-react"
-import { useAuthStore } from "../store/use_auth_store"
-import { Button } from "./ui/button"
-import { useOrderStore } from "../store/use-order-store"
-import { OrdersLockDialog } from "./orders-lock-dialog"
-import { useEffect, useState } from "react"
-import { SettingsModal } from "./SettingsModal"
+} from "lucide-react";
+import { useAuthStore } from "../store/use_auth_store";
+import { Button } from "./ui/button";
+import { useOrderStore } from "../store/use-order-store";
+import { usePermission } from "../hooks/use-permission";
+import { OrdersLockDialog } from "./orders-lock-dialog";
+import { useEffect, useState } from "react";
+import { SettingsModal } from "./SettingsModal";
 
 export function NavUser({
   user,
 }: {
   user: {
-    name: string
-    email: string
+    name: string;
+    email: string;
     // avatar: string
-  }
+  };
 }) {
-  const { isMobile, open, openMobile } = useSidebar()
-  const { logout } = useAuthStore()
-  const { toggleLockLoad, toggleLock, locked, lockStatus } = useOrderStore()
+  const { isMobile, open, openMobile } = useSidebar();
+  const { logout } = useAuthStore();
+  const { toggleLockLoad, toggleLock, locked, lockStatus } = useOrderStore();
+  // Locking/unlocking orders hits GET /lock (orders/edit) — omit the
+  // control entirely until permissions resolve so it never flashes.
+  const { allowed: canEditOrders, loaded: permsLoaded } = usePermission(
+    "orders",
+    "edit",
+  );
 
   useEffect(() => {
-    lockStatus()
-  }, [])
+    lockStatus();
+  }, []);
 
-  const [openSettings, setOpen] = useState(false)
+  const [openSettings, setOpen] = useState(false);
 
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <OrdersLockDialog>
-          <div className="mb-4 flex flex-col justify-center">
-            {locked ? (
-              <Button
-                // onClick={toggleLock}
-                className="bg-green-200 text-green-600"
-              >
-                {open || openMobile ? "open orders" : ""}
+        {permsLoaded && canEditOrders && (
+          <OrdersLockDialog>
+            <div className="mb-4 flex flex-col justify-center">
+              {locked ? (
+                <Button
+                  // onClick={toggleLock}
+                  className="bg-green-200 text-green-600"
+                >
+                  {open || openMobile ? "open orders" : ""}
 
-                {toggleLockLoad ? (
-                  <LoaderIcon
-                    role="status"
-                    aria-label="Loading"
-                    className={"size-4 animate-spin"}
-                  />
-                ) : (
-                  <LockOpenIcon />
-                )}
-              </Button>
-            ) : (
-              <Button
-                // onClick={toggleLock}
-                className=""
-                variant={"destructive"}
-              >
-                {open || openMobile ? "Close Orders" : ""}
-                {toggleLockLoad ? (
-                  <LoaderIcon
-                    role="status"
-                    aria-label="Loading"
-                    className={"size-4 animate-spin"}
-                  />
-                ) : (
-                  <Lock />
-                )}
-              </Button>
-            )}
-          </div>
-        </OrdersLockDialog>
+                  {toggleLockLoad ? (
+                    <LoaderIcon
+                      role="status"
+                      aria-label="Loading"
+                      className={"size-4 animate-spin"}
+                    />
+                  ) : (
+                    <LockOpenIcon />
+                  )}
+                </Button>
+              ) : (
+                <Button
+                  // onClick={toggleLock}
+                  className=""
+                  variant={"destructive"}
+                >
+                  {open || openMobile ? "Close Orders" : ""}
+                  {toggleLockLoad ? (
+                    <LoaderIcon
+                      role="status"
+                      aria-label="Loading"
+                      className={"size-4 animate-spin"}
+                    />
+                  ) : (
+                    <Lock />
+                  )}
+                </Button>
+              )}
+            </div>
+          </OrdersLockDialog>
+        )}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
@@ -151,20 +160,21 @@ export function NavUser({
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem
+            {/* <DropdownMenuItem
               onClick={(e) => {
                 e.preventDefault();
                 setOpen(true)}
               }
             >
               <>
-                {/* <div className=" flex" onClick={() => setOpen(true)}> */}
+                
                 <CogIcon />
                 Settings
                 <SettingsModal open={openSettings} onOpenChange={setOpen} />
-                {/* </div> */}
+               
+               
               </>
-            </DropdownMenuItem>
+            </DropdownMenuItem> */}
             {/* <DropdownMenuSeparator /> */}
             <DropdownMenuItem variant="destructive" onClick={() => logout()}>
               <LogOutIcon />
@@ -174,5 +184,5 @@ export function NavUser({
         </DropdownMenu>
       </SidebarMenuItem>
     </SidebarMenu>
-  )
+  );
 }

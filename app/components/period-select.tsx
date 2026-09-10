@@ -1,7 +1,7 @@
-import { CalendarDaysIcon, CalendarRange } from "lucide-react"
-import { useState } from "react"
-import { COUNTRY_LABELS, PERIOD_LABELS } from "../lib/utils"
-import type { Country, Period } from "../types/period"
+import { CalendarDaysIcon, CalendarRange } from "lucide-react";
+import { useState } from "react";
+import { COUNTRY_LABELS, PERIOD_LABELS } from "../lib/utils";
+import type { Country, Period } from "../types/period";
 import {
   Select,
   SelectContent,
@@ -9,26 +9,22 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./ui/select"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "./ui/popover"
-import { Button } from "./ui/button"
-import { Input } from "./ui/input"
-import { Label } from "./ui/label"
+} from "./ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
 
 interface PeriodSelectProps {
-  showAllCountry?:boolean
-  showCountrySelect?:boolean
-  value: Period
-  onChange: (p: Period) => void
-  country: Country
-  setCountry: (c: Country) => void
-  customFrom?: string
-  customTo?: string
-  onCustomRange?: (from: string, to: string) => void
+  showAllCountry?: boolean;
+  showCountrySelect?: boolean;
+  value: Period;
+  onChange: (p: Period) => void;
+  country: Country;
+  setCountry: (c: Country) => void;
+  customFrom?: string;
+  customTo?: string;
+  onCustomRange?: (from: string, to: string) => void;
 }
 
 export function PeriodSelect({
@@ -39,45 +35,45 @@ export function PeriodSelect({
   customFrom = "",
   customTo = "",
   onCustomRange,
-  showAllCountry=true,
-  showCountrySelect=true,
+  showAllCountry = true,
+  showCountrySelect = true,
 }: PeriodSelectProps) {
-  const [fromDate, setFromDate] = useState(customFrom)
-  const [toDate, setToDate] = useState(customTo)
-  const [open, setOpen] = useState(false)
+  const [fromDate, setFromDate] = useState(customFrom);
+  const [toDate, setToDate] = useState(customTo);
+  const [open, setOpen] = useState(false);
 
   const handleApply = () => {
     if (fromDate && toDate) {
-      onCustomRange?.(fromDate, toDate)
-      setOpen(false)
+      onCustomRange?.(fromDate, toDate);
+      setOpen(false);
     }
-  }
+  };
 
   const displayLabel =
     value === "custom" && customFrom && customTo
       ? `${customFrom} - ${customTo}`
-      : (PERIOD_LABELS[value] ?? value)
+      : (PERIOD_LABELS[value] ?? value);
 
   return (
     <div className="flex flex-wrap gap-2">
       {/* Country filter */}
-     { showCountrySelect && (
+      {showCountrySelect && (
         <Select value={country} onValueChange={(v) => setCountry(v as Country)}>
           <SelectTrigger className="">
             <SelectValue placeholder="Country" />
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-            {(Object.keys(COUNTRY_LABELS) as Country[])
-              .filter((c) => showAllCountry || c !== "all")
-              .map((c) => (
-                <SelectItem key={c} value={c}>
-                  {COUNTRY_LABELS[c]}
-                </SelectItem>
-              ))}
-          </SelectGroup>
-        </SelectContent>
-      </Select>
+              {(Object.keys(COUNTRY_LABELS) as Country[])
+                .filter((c) => showAllCountry || c !== "all")
+                .map((c) => (
+                  <SelectItem key={c} value={c}>
+                    {COUNTRY_LABELS[c]}
+                  </SelectItem>
+                ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
       )}
 
       {/* Period filter */}
@@ -85,9 +81,9 @@ export function PeriodSelect({
         value={value === "custom" ? "custom" : value}
         onValueChange={(e) => {
           if (e !== "custom") {
-            onChange(e as Period)
+            onChange(e as Period);
           } else {
-            onChange("custom")
+            onChange("custom");
           }
         }}
       >
@@ -155,7 +151,7 @@ export function PeriodSelect({
               <div className="flex gap-2 pt-1">
                 <Button
                   size="sm"
-                  variant="outline"
+                  variant="destructive"
                   className="h-8 flex-1 text-xs"
                   onClick={() => setOpen(false)}
                 >
@@ -163,7 +159,7 @@ export function PeriodSelect({
                 </Button>
                 <Button
                   size="sm"
-                  className="h-8 flex-1 text-xs"
+                  className="h-8 flex-1 text-xs bg-new"
                   disabled={!fromDate || !toDate}
                   onClick={handleApply}
                 >
@@ -175,5 +171,5 @@ export function PeriodSelect({
         </Popover>
       )}
     </div>
-  )
+  );
 }

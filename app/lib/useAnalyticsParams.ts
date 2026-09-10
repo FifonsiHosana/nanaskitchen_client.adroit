@@ -2,7 +2,7 @@ import { useParams, useSearchParams } from "react-router"
 import type { Country, Period } from "../types/period"
 import { DEFAULT_PRICE_GROUP, type PriceGroupSlug } from "./price-groups"
 
-const DEFAULT_PERIOD: Period = "all_time"
+const DEFAULT_PERIOD: Period = "this_week";
 const DEFAULT_COUNTRY: Country = "GHS"
 
 export function useAnalyticsParams() {

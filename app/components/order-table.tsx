@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { Skeleton } from "~/components/ui/skeleton"
+import { Skeleton } from "~/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -9,28 +9,37 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "~/components/ui/table"
-import { useOrderParams } from "../lib/useOrderParams"
-import { addCurrencySymbol, dateNormalize, STATUS_CONFIG } from "../lib/utils"
-import { useOrderStore } from "../store/use-order-store"
-import { OrdersDropdown } from "./orders-table-dropdown"
-import PaginationOrders from "./pagination"
-import { useState } from "react"
-import { Button } from "./ui/button"
-import { OrderDetails } from "./order-details"
-import { Spinner } from "./ui/spinner"
-import type { DataType } from "../types"
+} from "~/components/ui/table";
+import { useOrderParams } from "../lib/useOrderParams";
+import {
+  addCurrencySymbol,
+  cn,
+  dateNormalize,
+  STATUS_CONFIG,
+} from "../lib/utils";
+import { useOrderStore } from "../store/use-order-store";
+import { OrdersDropdown } from "./orders-table-dropdown";
+import PaginationOrders from "./pagination";
+import { useState } from "react";
+import { Button } from "./ui/button";
+import { OrderDetails } from "./order-details";
+import { Spinner } from "./ui/spinner";
+import type { DataType } from "../types";
+import { Badge } from "./ui/badge";
 
 export function OrderTable() {
-  const { params } = useOrderParams()
-  const [detailsOpen, setDetailsOpen] = useState(false)
-  const [selectedOrder, setSelectedOrder] = useState<DataType | null>(null)
+  const { params } = useOrderParams();
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<DataType | null>(null);
+  const [selectedRowId, setSelectedRowId] = useState<string | undefined>(
+    undefined,
+  );
 
   const { orders, totalCount, isLoading, isTableLoading, pageStatus } =
-    useOrderStore()
+    useOrderStore();
 
-  const currentPage = Number(params.page) || 1
-  const totalPages = Math.ceil(totalCount / Number(params.pageSize || 20))
+  const currentPage = Number(params.page) || 1;
+  const totalPages = Math.ceil(totalCount / Number(params.pageSize || 20));
 
   return (
     <div className="relative mt-4 overflow-hidden rounded-lg border p-2">
@@ -69,34 +78,50 @@ export function OrderTable() {
           ) : orders.length > 0 ? (
             orders.map((order) => (
               // No more <OrderDetails> here
-              <TableRow key={order.id}>
-                <TableCell className="font-medium">
+              <TableRow
+                data-state={selectedRowId === order.id ? "selected" : undefined}
+                onClick={() =>
+                  setSelectedRowId((prev) =>
+                    prev === order.id ? undefined : order.id,
+                  )
+                }
+                key={order.id}
+              >
+                <TableCell className="font-medium">{order.id}</TableCell>
+                <TableCell
+                  className={cn(
+                    selectedRowId === order.id &&
+                      "border-blue-300 border ring-blue-400",
+                  )}
+                >
+                  {" "}
                   <Button
                     onClick={() => {
-                      setSelectedOrder(order)
-                      setDetailsOpen(true)
+                      setSelectedOrder(order);
+                      setDetailsOpen(true);
                     }}
                     className="cursor-pointer hover:text-blue-500"
                     variant={"link"}
-                  >
-                    {order.id}
-                  </Button>
+                  >{`${order.firstName} ${order.lastName}`}</Button>
                 </TableCell>
-                <TableCell>{`${order.firstName} ${order.lastName}`}</TableCell>
                 <TableCell className="text-left">
-                  <div
-                    className="inline-flex items-center rounded-md border px-3 py-1 text-xs font-medium"
+                  <Badge
+                    className="inline-flex text-white items-center border text-xs font-medium"
                     style={{
                       backgroundColor:
                         pageStatus === "trash"
                           ? STATUS_CONFIG[pageStatus]?.color
                           : STATUS_CONFIG[order.status]?.color,
+                      color:
+                        pageStatus === "trash"
+                          ? STATUS_CONFIG[pageStatus]?.textColor
+                          : STATUS_CONFIG[order.status]?.textColor,
                     }}
                   >
                     {pageStatus === "trash"
                       ? STATUS_CONFIG[pageStatus]?.label
                       : STATUS_CONFIG[order.status]?.label}
-                  </div>
+                  </Badge>
                 </TableCell>
                 <TableCell>
                   {addCurrencySymbol(order.currency, order.total)}
@@ -145,5 +170,5 @@ export function OrderTable() {
         totalPages={totalPages}
       />
     </div>
-  )
+  );
 }

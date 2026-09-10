@@ -1,5 +1,5 @@
-import type React from "react"
-import { Button } from "~/components/ui/button"
+import type React from "react";
+import { Button } from "~/components/ui/button";
 import {
   Sheet,
   SheetClose,
@@ -9,39 +9,47 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "~/components/ui/sheet"
-import PriceTiersDetails from "./price-tiers-details"
-import { Tabs, TabsList, TabsTrigger } from "./ui/tabs"
-import { useFlavorStore } from "../store/use_flavor_store"
-import { ScrollArea } from "./ui/scroll-area"
-import { useRef, useState } from "react"
-import { toast } from "sonner"
-import { ApplyChangesDialog } from "./apply-changes-dialog"
+} from "~/components/ui/sheet";
+import PriceTiersDetails from "./price-tiers-details";
+import { Tabs, TabsList, TabsTrigger } from "./ui/tabs";
+import { useFlavorStore } from "../store/use_flavor_store";
+import { ScrollArea } from "./ui/scroll-area";
+import { useRef, useState } from "react";
+import { toast } from "sonner";
+import { ApplyChangesDialog } from "./apply-changes-dialog";
 
-import type { PriceGroupSlug } from "../lib/price-groups"
-import { PRICE_GROUPS } from "../lib/price-groups"
+import type { PriceGroupSlug } from "../lib/price-groups";
+import { PRICE_GROUPS } from "../lib/price-groups";
+import { usePermission } from "../hooks/use-permission";
 
-type TabValue = PriceGroupSlug
+type TabValue = PriceGroupSlug;
 
 export function PriceTiersSheet({
   flavorId,
   children,
 }: {
-  flavorId: number
-  children: React.ReactNode
+  flavorId: number;
+  children: React.ReactNode;
 }) {
-  const [activeTab, setActiveTab] = useState<TabValue>("retailer")
-  const { fetchPriceTiers, priceTier } = useFlavorStore()
+  const [activeTab, setActiveTab] = useState<TabValue>("retailer");
+  const { fetchPriceTiers, priceTier } = useFlavorStore();
 
-  const [isDirty, setIsDirty] = useState(false)
-  const [hasDraft, setHasDraft] = useState(false)
-  const revertRef = useRef<() => void>(() => {})
+  const [isDirty, setIsDirty] = useState(false);
+  const [hasDraft, setHasDraft] = useState(false);
+  const revertRef = useRef<() => void>(() => {});
+  // All pricing writes (PATCH /products/price-list/tiers,
+  // POST /products/price-list/tiers/apply) require products/edit.
+  // The edit toolbar is omitted — never flashed — until permissions resolve.
+  const { allowed: canEditTiers, loaded: permsLoaded } = usePermission(
+    "products",
+    "edit",
+  );
 
   // Called after apply succeeds — refetch to reflect any server-side changes
   const handleApplyConfirmed = async () => {
-    await fetchPriceTiers(flavorId)
-    toast.success("Tiers refreshed after apply")
-  }
+    await fetchPriceTiers(flavorId);
+    toast.success("Tiers refreshed after apply");
+  };
 
   return (
     <Sheet>
@@ -77,7 +85,7 @@ export function PriceTiersSheet({
             onDraftChange={setHasDraft}
             onRevert={
               ((fn: () => void) => {
-                revertRef.current = fn
+                revertRef.current = fn;
               }) as unknown as () => void
             }
           />
@@ -91,7 +99,7 @@ export function PriceTiersSheet({
               </p>
             )}
 
-            {(isDirty || hasDraft) && (
+            {(isDirty || hasDraft) && permsLoaded && canEditTiers && (
               <SheetClose>
                 <Button variant="ghost" onClick={() => revertRef.current()}>
                   Revert changes
@@ -100,30 +108,35 @@ export function PriceTiersSheet({
             )}
 
             {/* Save for just this flavor */}
-            <Button
-              type="submit"
-              form="price-tiers-form"
-              disabled={!isDirty && !hasDraft}
-            >
-              Save
-            </Button>
+            {permsLoaded && canEditTiers && (
+              <Button
+                type="submit"
+                form="price-tiers-form"
+                disabled={!isDirty && !hasDraft}
+              >
+                Save
+              </Button>
+            )}
 
             {/* Apply to other flavors */}
-            <ApplyChangesDialog
-              sourceFlavorId={flavorId}
-              onConfirmed={handleApplyConfirmed}
-            >
-              <Button
-                disabled={!isDirty && !hasDraft}
-                variant="outline"
-                type="button"
+            {permsLoaded && canEditTiers && (
+              <ApplyChangesDialog
+                sourceFlavorId={flavorId}
+                onConfirmed={handleApplyConfirmed}
               >
-                Apply to others
-              </Button>
-            </ApplyChangesDialog>
+                <Button
+                  disabled={!isDirty && !hasDraft}
+                  variant="outline"
+                  type="button"
+                  // className="bg-new"
+                >
+                  Apply to others
+                </Button>
+              </ApplyChangesDialog>
+            )}
 
             <SheetClose asChild>
-              <Button onClick={() => revertRef.current()} variant="outline">
+              <Button onClick={() => revertRef.current()} variant="destructive">
                 Cancel
               </Button>
             </SheetClose>
@@ -131,5 +144,5 @@ export function PriceTiersSheet({
         </SheetFooter>
       </SheetContent>
     </Sheet>
-  )
+  );
 }
