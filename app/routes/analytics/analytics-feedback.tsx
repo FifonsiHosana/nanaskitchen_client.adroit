@@ -9,6 +9,7 @@ import {
 import { useFeedbackParams } from "../../lib/useFeedbackParams";
 import { HorizontalBarCard } from "@/app/components/analytics/feedback/attribution-chart";
 import { PreferenceChart } from "@/app/components/analytics/feedback/preference-chart";
+import { FeedbackAnalyticsSkeleton } from "@/app/components/analytics-skeleton";
 
 const analyticsFeedback = () => {
   const { params } = useFeedbackParams();
@@ -28,6 +29,10 @@ const analyticsFeedback = () => {
   useEffect(() => {
     fetchAnswersAnalytics();
   }, []);
+
+  if (loading && !summary) {
+    return <FeedbackAnalyticsSkeleton />;
+  }
 
   return (
     <div className="flex flex-col gap-2 overflow-hidden p-4">

@@ -8,7 +8,6 @@ import { useOrderParams } from "../lib/useOrderParams"
 const OrderStats = ({ orderStats }: { orderStats: orderStatsTypes }) => {
   const {params} = useOrderParams();
   const {pageStatus} = useOrderStore();
-console.log(pageStatus);
 
 const funnelStatus =
   pageStatus === "completed" ? "completed" : pageStatus === "awaiting_payment" ? "pending" : pageStatus === "delivered" ? "delivered" : null

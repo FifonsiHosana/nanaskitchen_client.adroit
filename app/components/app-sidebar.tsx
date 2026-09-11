@@ -98,8 +98,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       filterNavBySee(buildNavItems(flavors), (item) =>
         can(item.resource, "see"),
       ),
-    // `permissions` re-runs the filter once `fetchPermissions()` resolves.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [flavors, permissions, loaded],
   );
 
@@ -125,11 +123,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             {rolesLoaded && isAdmin && (
               <NavMain
                 items={[
-                  {
-                    title: "Audit Trail",
-                    url: "audit-trail",
-                    icon: <Footprints />,
-                  },
                   {
                     title: "Users",
                     url: "users",

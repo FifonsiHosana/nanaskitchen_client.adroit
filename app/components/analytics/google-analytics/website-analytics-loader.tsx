@@ -1,9 +1,9 @@
-import { cn } from "~/lib/utils"
+import { cn } from "~/lib/utils";
 
 // ── Base shimmer block ────────────────────────────────────────────────────────
 
 function Shimmer({ className }: { className?: string }) {
-  return <div className={cn("animate-pulse rounded-md bg-muted", className)} />
+  return <div className={cn("animate-pulse rounded-md bg-muted", className)} />;
 }
 
 // ── Skeleton for a single KPI stat card ──────────────────────────────────────
@@ -23,15 +23,15 @@ function StatCardSkeleton() {
           <Shimmer
             key={i}
             className="flex-1 rounded-sm"
-            style={{
-              height: `${30 + Math.sin(i * 1.2) * 20 + 20}%`,
-              animationDelay: `${i * 80}ms`,
-            }}
+            // style={{
+            //   height: `${30 + Math.sin(i * 1.2) * 20 + 20}%`,
+            //   animationDelay: `${i * 80}ms`,
+            // }}
           />
         ))}
       </div>
     </div>
-  )
+  );
 }
 
 // ── Skeleton for New vs Returning panel ──────────────────────────────────────
@@ -56,7 +56,7 @@ function NewVsReturningSkeleton() {
           <Shimmer className="h-3 w-10" />
         </div>
 
-        <div className="mx-4 h-12 w-[1px] bg-border" />
+        <div className="mx-4 h-12 w-px bg-border" />
 
         <div className="flex flex-col items-end gap-2">
           <div className="flex items-center gap-2">
@@ -71,14 +71,14 @@ function NewVsReturningSkeleton() {
       {/* Progress bar */}
       <Shimmer className="h-2 w-full rounded-full" />
     </div>
-  )
+  );
 }
 
 // ── Skeleton for Conversion Funnel panel ─────────────────────────────────────
 
 function ConversionFunnelSkeleton() {
   return (
-    <div className="flex flex-col overflow-hidden rounded-xl border bg-card shadow-sm">
+    <div className="flex flex-col justify-end overflow-hidden rounded-xl border bg-card shadow-sm">
       {/* Title */}
       <div className="flex flex-col gap-2 p-5 pb-3">
         <Shimmer className="h-4 w-40" />
@@ -92,23 +92,23 @@ function ConversionFunnelSkeleton() {
             key={label}
             className={cn(
               "flex flex-col items-center gap-1.5 px-2",
-              i !== 3 && "border-r border-border/50"
+              i !== 3 && "border-r border-border/50",
             )}
           >
             <Shimmer
               className="h-6 w-12"
-              style={{ animationDelay: `${i * 100}ms` }}
+              // style={{ animationDelay: `${i * 100}ms` }}
             />
             <Shimmer
               className="h-2 w-10"
-              style={{ animationDelay: `${i * 100 + 50}ms` }}
+              // style={{ animationDelay: `${i * 100 + 50}ms` }}
             />
           </div>
         ))}
       </div>
 
       {/* Chart area */}
-      <div className="flex h-24 items-end px-0">
+      <div className="flex h-24  px-0">
         <div className="relative h-full w-full overflow-hidden">
           {/* Fake area chart shape */}
           <svg
@@ -125,7 +125,7 @@ function ConversionFunnelSkeleton() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 // ── Main exported skeleton ────────────────────────────────────────────────────
@@ -148,5 +148,5 @@ export function WebsiteAnalyticsSkeleton() {
         <ConversionFunnelSkeleton />
       </div>
     </div>
-  )
+  );
 }

@@ -45,7 +45,19 @@ api.interceptors.response.use(
   async (error) => {
     const original = error.config
 
-    if (error.response?.status !== 401 || original._retry) {
+    if (!original || original._retry) {
+      return Promise.reject(error)
+    }
+
+    // A 401 from login/refresh means bad credentials or no session — not an
+    // expired access token. Retrying refresh here would wipe state and force
+    // `window.location.href = "/"` (full page reload on wrong password).
+    const url: string = original.url ?? ""
+    if (url.includes("/auth/login") || url.includes("/auth/refresh")) {
+      return Promise.reject(error)
+    }
+
+    if (error.response?.status !== 401) {
       return Promise.reject(error)
     }
 

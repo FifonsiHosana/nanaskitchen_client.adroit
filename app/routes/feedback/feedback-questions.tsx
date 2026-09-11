@@ -30,6 +30,7 @@ import {
 } from "@/app/store/use_feedback_store";
 import { Card } from "@/app/components/ui/card";
 import { Can } from "@/app/components/can";
+import { FeedbackQuestionsSkeleton } from "@/app/components/tables-skeleton";
 import {
   Table,
   TableBody,
@@ -38,7 +39,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/app/components/ui/table";
-import { Spinner } from "@/app/components/ui/spinner";
 
 const TYPE_META: Record<
   FeedbackQuestion["questionType"],
@@ -144,6 +144,10 @@ export default function FeedbackQuestionsPage() {
     fetchQuestions();
   }, []);
 
+  if (loading && questions.length === 0) {
+    return <FeedbackQuestionsSkeleton />;
+  }
+
   return (
     <div className="flex flex-col gap-4 p-4">
       <div className="flex justify-end items-end">
@@ -155,10 +159,6 @@ export default function FeedbackQuestionsPage() {
       {questions.length === 0 ? (
         <p className="py-8 text-center text-sm text-muted-foreground">
           No questions yet. Add one to get started.
-        </p>
-      ) : loading ? (
-        <p className="py-8 text-center text-sm text-muted-foreground">
-          <Spinner />
         </p>
       ) : (
         <Card className="p-1">

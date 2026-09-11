@@ -5,7 +5,7 @@ import { ShieldCheck } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
 import { Card } from "@/app/components/ui/card";
 import { Switch } from "@/app/components/ui/switch";
-import { Spinner } from "@/app/components/ui/spinner";
+import { RolesPermissionsSkeleton } from "@/app/components/tables-skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/app/components/ui/tabs";
 import {
   Table,
@@ -91,11 +91,7 @@ export default function RolesPermissionsPage() {
   }, [matrix]);
 
   if (!rolesLoaded || !matrixLoaded || !draftReady) {
-    return (
-      <p className="py-8 text-center text-sm text-muted-foreground">
-        <Spinner />
-      </p>
-    );
+    return <RolesPermissionsSkeleton />;
   }
 
   if (roles.length === 0) {

@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import {
   Dropzone,
   DropZoneArea,
@@ -9,12 +9,12 @@ import {
   DropzoneRemoveFile,
   DropzoneTrigger,
   useDropzone,
-} from "~/components/ui/dropzone"
-import { CloudUploadIcon, Loader2Icon, Trash2Icon } from "lucide-react"
-import { useEffect, useRef, useState } from "react"
-import axios from "axios"
-import { Button } from "./ui/button"
-import { api } from "../lib/axios"
+} from "~/components/ui/dropzone";
+import { CloudUploadIcon, Loader2Icon, Trash2Icon } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import axios from "axios";
+import { Button } from "./ui/button";
+import { api } from "../lib/axios";
 
 export function MultiImages({
   setValue,
@@ -23,38 +23,38 @@ export function MultiImages({
   removeExistingImage,
   product,
 }) {
-  const [uploadingCount, setUploadingCount] = useState(0)
-  const isUploading = uploadingCount > 0
-  const dropzoneRef = useRef<HTMLDivElement>(null)
+  const [uploadingCount, setUploadingCount] = useState(0);
+  const isUploading = uploadingCount > 0;
+  const dropzoneRef = useRef<HTMLDivElement>(null);
   const [mainImage, setMainImage] = useState<string>(
-    product.image !== null ? product.mainImage : product.images[0]
-  )
-  console.log(` main${product.mainImage} and array ${product.images[0]} `)
-  console.log("product", product)
+    product.image !== null ? product.mainImage : product.images[0],
+  );
+  console.log(` main${product.mainImage} and array ${product.images[0]} `);
+  console.log("product", product);
 
   useEffect(() => {
-    setValue("image", mainImage, { shouldDirty: true })
-  }, [mainImage])
+    setValue("image", mainImage, { shouldDirty: true });
+  }, [mainImage]);
 
   const dropzone = useDropzone({
     onDropFile: async (file: File) => {
       const input = dropzoneRef.current?.querySelector(
-        "input[type='file']"
-      ) as HTMLInputElement | null
-      if (input) input.value = ""
+        "input[type='file']",
+      ) as HTMLInputElement | null;
+      if (input) input.value = "";
 
       const alreadyUploaded = Array.isArray(imagesWatch)
         ? imagesWatch.length
-        : 0
+        : 0;
       if (alreadyUploaded >= 4) {
         return {
           status: "error",
           error: `Maximum 4 images allowed`,
-        }
+        };
       }
-      setUploadingCount((c) => c + 1)
-      const formData = new FormData()
-      formData.append("image", file)
+      setUploadingCount((c) => c + 1);
+      const formData = new FormData();
+      formData.append("image", file);
       // formData.append("upload_preset", "default_preset")
 
       // const response = await fetch(
@@ -65,22 +65,22 @@ export function MultiImages({
       try {
         const res = await api.post("/products/image", formData, {
           headers: { "Content-Type": "multipart/form-data" },
-        })
+        });
 
-        const data = await res.data
-        const cloudinaryUrl = data.url
+        const data = await res.data;
+        const cloudinaryUrl = data.url;
 
         // 2. Append the URL to RHF's otherImages array
-        const currentImages = getValues("images") ?? []
+        const currentImages = getValues("images") ?? [];
         setValue("otherImages", [...currentImages, cloudinaryUrl], {
           shouldDirty: true,
-        })
+        });
         return {
           status: "success",
           result: cloudinaryUrl,
-        }
+        };
       } finally {
-        setUploadingCount((c) => Math.max(0, c - 1))
+        setUploadingCount((c) => Math.max(0, c - 1));
       }
     },
     validation: {
@@ -90,7 +90,7 @@ export function MultiImages({
       maxSize: 10 * 1024 * 1024,
       maxFiles: 4,
     },
-  })
+  });
 
   //   useEffect(() => {
   //     const successfulImages = dropzone.fileStatuses
@@ -105,19 +105,19 @@ export function MultiImages({
   useEffect(() => {
     const successfulImages = dropzone.fileStatuses
       .filter((f) => f.status === "success")
-      .map((f) => f.result)
+      .map((f) => f.result);
 
     //   const original = Array.isArray(product?.images) ? product.images : []
     const current = Array.isArray(getValues("images"))
       ? getValues("images")
-      : []
+      : [];
 
-    const merged = [...new Set([...current, ...successfulImages])]
+    const merged = [...new Set([...current, ...successfulImages])];
 
     if (dropzone.fileStatuses.length > 0) {
-      setValue("images", merged, { shouldDirty: true })
+      setValue("images", merged, { shouldDirty: true });
     }
-  }, [dropzone.fileStatuses])
+  }, [dropzone.fileStatuses]);
 
   return (
     <div className="not-prose flex flex-col gap-4">
@@ -152,19 +152,17 @@ export function MultiImages({
       <Dropzone {...dropzone}>
         <div>
           <div className="flex justify-between">
-            <DropzoneDescription>
-              Please select up to 4 images
-            </DropzoneDescription>
+            <DropzoneDescription>Please 4 select up to images</DropzoneDescription>
             <DropzoneMessage />
           </div>
           <DropZoneArea
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              e.target.value = ""
+              e.target.value = "";
             }}
           >
             <DropzoneTrigger
               onChange={() => (e: React.ChangeEvent<HTMLInputElement>) => {
-                e.target.value = ""
+                e.target.value = "";
               }}
               className="flex flex-col items-center gap-4 bg-transparent p-10 text-center text-sm"
             >
@@ -197,5 +195,5 @@ export function MultiImages({
         </div>
       </Dropzone>
     </div>
-  )
+  );
 }

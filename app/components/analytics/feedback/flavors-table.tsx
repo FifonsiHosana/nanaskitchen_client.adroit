@@ -22,10 +22,10 @@ import { PriceTiersSheet } from "../../price-tiers-sheet";
 import { Can } from "../../can";
 import { useNavigate } from "react-router";
 import { capitalizeFirstOnly, cn } from "../../../lib/utils";
-import fa from "zod/v4/locales/fa.cjs";
+import { Skeleton } from "../../ui/skeleton";
 
 export function FlavorsTable() {
-  const { fetchFlavors, flavors, fetchPriceTiers } = useFlavorStore();
+  const { fetchFlavors, flavors, loading, fetchPriceTiers } = useFlavorStore();
   const navigate = useNavigate();
 
   const [selectedRowId, setSelectedRowId] = useState<number | undefined>(
@@ -39,6 +39,38 @@ export function FlavorsTable() {
   const navigateToEditPage = (flavorId: string) => {
     navigate(`/portal/products-all/${flavorId}`);
   };
+
+  if (loading && flavors.length === 0) {
+    return (
+      <div className="relative mt-4 overflow-hidden rounded-lg border p-2">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Image</TableHead>
+              <TableHead>Title</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <TableRow key={i}>
+                <TableCell>
+                  <Skeleton className="h-15 w-15 rounded-md" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-40" />
+                </TableCell>
+                <TableCell className="text-right">
+                  <Skeleton className="ml-auto h-8 w-8 rounded-md" />
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    );
+  }
+
   return (
     <div className="relative mt-4 overflow-hidden rounded-lg border p-2">
       <Table>

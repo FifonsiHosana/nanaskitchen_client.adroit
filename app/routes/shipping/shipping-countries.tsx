@@ -1,12 +1,14 @@
 import { AddCountryDialog } from "@/app/components/shipping/add-country-dialog";
 import { CountryRow } from "@/app/components/shipping/country-row";
 import CountryTable from "@/app/components/shipping/country-table";
+import { CountriesTableSkeleton } from "@/app/components/tables-skeleton";
 import { useCountriesStore } from "@/app/store/use_countries_store";
 import { useEffect } from "react";
 import { toast } from "sonner";
 
 const ShippingCountries = () => {
-  const { countries, fetchCountries, deleteCountry } = useCountriesStore();
+  const { countries, loading, fetchCountries, deleteCountry } =
+    useCountriesStore();
 
   useEffect(() => {
     fetchCountries();
@@ -19,6 +21,10 @@ const ShippingCountries = () => {
     } else {
       toast.error("Failed to remove country");
     }
+  }
+
+  if (loading && countries.length === 0) {
+    return <CountriesTableSkeleton />;
   }
 
   return (

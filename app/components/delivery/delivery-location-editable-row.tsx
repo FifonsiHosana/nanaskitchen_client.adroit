@@ -12,6 +12,7 @@ import {
   type DeliveryLocationFormValues,
 } from "@/app/lib/delivery-location-schema";
 import type { DeliveryLocationRecord } from "@/app/store/use_delivery_locations_store";
+import { cn } from "@/app/lib/utils";
 
 export function EditableRow({
   loc,
@@ -25,6 +26,9 @@ export function EditableRow({
   onDelete: (id: number) => Promise<void>;
 }) {
   const [isEditing, setIsEditing] = useState(false);
+  const [selectedRowId, setSelectedRowId] = useState<number | undefined>(
+    undefined,
+  );
 
   const defaults: DeliveryLocationFormValues = {
     location: loc.location,
@@ -63,8 +67,20 @@ export function EditableRow({
   }
 
   return (
-    <TableRow data-state={isEditing ? "selected" : undefined}>
-      <TableCell>
+    <TableRow
+      data-state={
+        isEditing || selectedRowId === loc.id ? "selected" : undefined
+      }
+      onClick={() =>
+        setSelectedRowId((prev) => (prev === loc.id ? undefined : loc.id))
+      }
+      key={loc.id}
+    >
+      <TableCell
+        className={cn(
+          selectedRowId === loc.id && "border-blue-300 border ring-blue-400",
+        )}
+      >
         <Input
           {...register("location")}
           id={`location-${index}`}

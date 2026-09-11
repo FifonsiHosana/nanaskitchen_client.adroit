@@ -113,6 +113,10 @@ export default function ProductForm({ product }: UserFormProps) {
       unitsPerCase: 0,
     },
   });
+
+  console.log("isDirty", isDirty);
+  console.log("dirtyFields", dirtyFields);
+
   useEffect(() => {
     if (product) {
       setValue("title", product.productTitle);
@@ -347,17 +351,21 @@ export default function ProductForm({ product }: UserFormProps) {
               </Field>
             </div> */}
             </fieldset>
-            <div className="grid grid-cols-5 gap-5">
+            <div className="md:grid md:grid-cols-5 flex gap-5">
               <Button
                 onClick={() => navigate(-1)}
                 className="cursor-pointer"
                 type="button"
-                variant={"destructive"}
+                // variant={"destructive"}
               >
                 cancel
               </Button>
               {canEditProduct && (
-                <Button type="submit" className="cursor-pointer bg-new">
+                <Button
+                  disabled={!isDirty}
+                  type="submit"
+                  className="cursor-pointer bg-new"
+                >
                   Submit
                 </Button>
               )}

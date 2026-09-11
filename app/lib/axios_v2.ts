@@ -45,7 +45,18 @@ api.interceptors.response.use(
   async (error) => {
     const original = error.config
 
-    if (error.response?.status !== 401 || original._retry) {
+    if (!original || original._retry) {
+      return Promise.reject(error)
+    }
+
+    // Same guard as the V1 instance: never attempt a refresh for the auth
+    // endpoints themselves, or a failed login forces a full page reload.
+    const url: string = original.url ?? ""
+    if (url.includes("/auth/login") || url.includes("/auth/refresh")) {
+      return Promise.reject(error)
+    }
+
+    if (error.response?.status !== 401) {
       return Promise.reject(error)
     }
 

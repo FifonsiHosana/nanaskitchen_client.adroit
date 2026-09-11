@@ -22,6 +22,7 @@ import { AddRow } from "@/app/components/delivery/delivery-location-add-row";
 import { Input } from "@/app/components/ui/input";
 import { useShippingParams } from "@/app/lib/useShippingParams";
 import { Can } from "@/app/components/can";
+import { DeliveryLocationsSkeleton } from "@/app/components/tables-skeleton";
 
 export function DeliveryLocationAdd({}: {
   // locations: DeliveryLocationRecord[];
@@ -123,6 +124,11 @@ export function DeliveryLocationAdd({}: {
   }
 
   const isMobile = useIsMobile();
+
+  if (loading && locations.length === 0) {
+    return <DeliveryLocationsSkeleton />;
+  }
+
   return (
     <div className="p-4">
       <div className="flex justify-end pb-3 ">
@@ -155,20 +161,13 @@ export function DeliveryLocationAdd({}: {
               <TableHead>Price</TableHead>
               <TableHead>Discount %</TableHead>
               <TableHead>Free Delivery</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <Can resource="shipping" action="edit">
+                <TableHead className="text-right">Actions</TableHead>
+              </Can>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {loading && locations.length === 0 ? (
-              <TableRow>
-                <TableCell
-                  colSpan={5}
-                  className="text-center text-sm text-muted-foreground"
-                >
-                  Loading…
-                </TableCell>
-              </TableRow>
-            ) : error && locations.length === 0 ? (
+            {error && locations.length === 0 ? (
               <TableRow>
                 <TableCell
                   colSpan={5}

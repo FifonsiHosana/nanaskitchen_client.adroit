@@ -182,7 +182,9 @@ export function ProductTable({
                     <TableHead>Min. Quantity</TableHead>
                   </>
                 )}
-                <TableHead className="text-center">Actions</TableHead>
+                <Can resource="products" action="edit">
+                  <TableHead className="text-center">Actions</TableHead>
+                </Can>
               </TableRow>
             </TableHeader>
             {isProductsTable ? (

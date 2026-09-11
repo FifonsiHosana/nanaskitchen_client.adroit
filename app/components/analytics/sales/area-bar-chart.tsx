@@ -118,7 +118,7 @@ export function OrderLocationChart() {
             </BarChart>
           </ChartContainer>
         ) : (
-          <div className="flex justify-center items-center gap-2 p-10 text-lg text-gray-500">
+          <div className="flex items-center justify-center gap-2 p-10 text-lg text-gray-500">
             No Data Yet
             <LucideServerOff />
           </div>

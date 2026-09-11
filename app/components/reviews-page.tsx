@@ -283,44 +283,77 @@ function ReviewCard({ review }: { review: Review }) {
 }
 
 // ─── Card Skeleton ────────────────────────────────────────────────────────────
+// Mirrors `ReviewCard` above: header (avatar + name + badge), product box,
+// comment area, action footer.
 function ReviewCardSkeleton() {
   return (
-    <div className="flex flex-col gap-3 rounded-xl border bg-muted/20 p-4">
-      <div className="flex items-center gap-3">
-        <Skeleton className="h-9 w-9 rounded-full" />
-        <div className="flex flex-col gap-1.5">
-          <Skeleton className="h-3 w-28" />
-          <Skeleton className="h-2.5 w-36" />
+    <div className="flex h-full animate-pulse flex-col gap-4 rounded-xl border bg-card p-5">
+      {/* Header */}
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-3">
+          <Skeleton className="h-10 w-10 shrink-0 rounded-full" />
+          <Skeleton className="h-3.5 w-28" />
         </div>
-        <Skeleton className="ml-auto h-5 w-20 rounded-full" />
+        <Skeleton className="h-5 w-20 rounded-full" />
       </div>
-      <div className="flex gap-2">
-        <Skeleton className="h-8 w-8 rounded-md" />
-        <div className="flex flex-1 flex-col gap-1.5">
+      {/* Product info box */}
+      <div className="flex items-center gap-3 rounded-lg bg-muted/30 p-2">
+        <Skeleton className="h-10 w-10 shrink-0 rounded-md" />
+        <div className="flex min-w-0 flex-1 flex-col gap-1.5">
           <Skeleton className="h-2.5 w-32" />
           <Skeleton className="h-3 w-24" />
         </div>
+        <Skeleton className="h-3 w-14 shrink-0" />
       </div>
-      <div className="flex flex-col gap-1.5">
-        <Skeleton className="h-3 w-full" />
-        <Skeleton className="h-3 w-4/5" />
-        <Skeleton className="h-3 w-3/5" />
+      {/* Comment */}
+      <div className="flex-1">
+        <div className="flex h-24 flex-col gap-1.5">
+          <Skeleton className="h-3 w-full" />
+          <Skeleton className="h-3 w-4/5" />
+          <Skeleton className="h-3 w-3/5" />
+        </div>
       </div>
-      <div className="flex gap-2 pt-1">
-        <Skeleton className="h-8 w-24 rounded-md" />
-        <Skeleton className="h-8 w-24 rounded-md" />
+      {/* Footer */}
+      <div className="mt-auto flex items-center justify-between gap-2 border-t pt-4">
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-8 w-24 rounded-md" />
+          <Skeleton className="h-8 w-24 rounded-md" />
+        </div>
+        <Skeleton className="h-3 w-16" />
       </div>
     </div>
   );
 }
 
 // ─── Stat Skeleton ────────────────────────────────────────────────────────────
+// Mirrors `SummaryCard`: rounded-xl border bg-muted/40 p-3.
 function StatSkeleton() {
   return (
-    <div className="flex flex-col gap-2 rounded-xl border bg-muted/40 p-3 sm:p-4">
-      <Skeleton className="h-3 w-20" />
+    <div className="flex animate-pulse flex-col gap-2 rounded-xl border bg-muted/40 p-3 sm:p-4">
+      <Skeleton className="h-3 w-24" />
       <Skeleton className="h-7 w-14" />
       <Skeleton className="h-2.5 w-24" />
+    </div>
+  );
+}
+
+// ─── Full page skeleton (exported for reuse) ──────────────────────────────────
+export function ReviewsPageSkeleton() {
+  return (
+    <div className="flex animate-pulse flex-col gap-4 p-4">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-5">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <StatSkeleton key={i} />
+        ))}
+      </div>
+      <div className="flex justify-end">
+        <Skeleton className="h-9 w-48 rounded-md" />
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <ReviewCardSkeleton key={i} />
+        ))}
+      </div>
     </div>
   );
 }

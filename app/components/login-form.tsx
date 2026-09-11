@@ -110,7 +110,7 @@ export function LoginForm({
               {...register("password")}
               className="h-full text-base py-0 placeholder:tracking-widest"
               id="password"
-              type={viewPassword ? "password" : "text"}
+              type={viewPassword ? "text" : "password"}
               required
               placeholder="•••••••"
             />
@@ -120,7 +120,7 @@ export function LoginForm({
               className="cursor-pointer"
               onClick={() => setViewPassword(!viewPassword)}
             >
-              {viewPassword ? <EyeIcon /> : <EyeOffIcon />}
+              {viewPassword ? <EyeOffIcon /> : <EyeIcon />}
             </InputGroupAddon>
           </InputGroup>
         </Field>
