@@ -41,9 +41,9 @@ export function AddProductForm() {
             variants={variants}
           />
         </fieldset>
-        <div className="grid grid-cols-5 gap-5">
+        <div className="md:grid md:grid-cols-5 flex gap-5">
           <Button
-            // variant={"destructive"}
+            variant={"destructive"}
             onClick={() => navigate(-1)}
             className="cursor-pointer"
             type="button"
@@ -53,7 +53,7 @@ export function AddProductForm() {
           {canEditProduct && (
             <Button
               onClick={handleSubmit}
-              disabled={submitting }
+              disabled={submitting}
               className="cursor-pointer"
             >
               {submitting ? "Saving..." : "Submit"}

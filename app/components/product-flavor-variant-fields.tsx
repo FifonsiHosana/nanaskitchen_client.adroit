@@ -1,4 +1,4 @@
-import { Field, FieldLabel } from "./ui/field"
+import { Field, FieldLabel } from "./ui/field";
 import {
   Select,
   SelectContent,
@@ -6,10 +6,10 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./ui/select"
-import { AddVariantDialog } from "./add-variant-dialog"
-import type { Flavors } from "../store/use_flavor_store"
-import type { Variant } from "../store/use_catalog_store"
+} from "./ui/select";
+import { AddVariantDialog } from "./add-variant-dialog";
+import type { Flavors } from "../store/use_flavor_store";
+import type { Variant } from "../store/use_catalog_store";
 
 export function ProductFlavorVariantFields({
   flavors,
@@ -19,15 +19,15 @@ export function ProductFlavorVariantFields({
   onFlavorChange,
   onVariantChange,
 }: {
-  flavors: Flavors[]
-  variants: Variant[]
-  flavorId: string
-  variantId: string
-  onFlavorChange: (v: string) => void
-  onVariantChange: (v: string) => void
+  flavors: Flavors[];
+  variants: Variant[];
+  flavorId: string;
+  variantId: string;
+  onFlavorChange: (v: string) => void;
+  onVariantChange: (v: string) => void;
 }) {
   return (
-    <div className="grid grid-cols-2 gap-4">
+    <div className="grid md:grid-cols-2 grid-cols-1 gap-4">
       <Field>
         <FieldLabel>Flavor</FieldLabel>
         <Select value={flavorId} onValueChange={onFlavorChange}>
@@ -67,5 +67,5 @@ export function ProductFlavorVariantFields({
         </div>
       </Field>
     </div>
-  )
+  );
 }
