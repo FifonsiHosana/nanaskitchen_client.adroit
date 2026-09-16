@@ -24,7 +24,7 @@ export function AuditTable() {
   }, [params.page, params.pageSize]);
 
   return (
-    <>
+    <div className="p-4">
       <Table>
         <TableHeader>
           <TableRow>
@@ -90,6 +90,6 @@ export function AuditTable() {
         currentTable="audit"
         totalPages={totalPages}
       />
-    </>
+    </div>
   );
 }
