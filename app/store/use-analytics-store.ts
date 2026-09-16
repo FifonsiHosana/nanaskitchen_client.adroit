@@ -228,21 +228,18 @@ export const useAnalyticsCustomersStore = create<AnalyticsCustomersStore>(
       set({ isLoading: true });
       try {
         const { periodQuery, ...restParams } = params;
-        // const curr = country || "GHS"
+
         const [seg, top] = await Promise.all([
           api.get(`/analytics/customers/segments`, {
-            params: { ...periodQuery, pricingGroup: restParams.pricingGroup },
+            params: { ...periodQuery, ...restParams },
           }),
           api.get(`/analytics/customers/top`, {
-            params: { ...restParams, ...periodQuery },
+            params: { ...periodQuery, ...restParams },
           }),
         ]);
 
         set({
-          data: {
-            seg: seg.data,
-            top: top.data,
-          },
+          data: { seg: seg.data, top: top.data },
           totalCount: top.data.total,
           isLoading: false,
         });
@@ -255,21 +252,19 @@ export const useAnalyticsCustomersStore = create<AnalyticsCustomersStore>(
     refetch: async (params) => {
       set({ isRefetching: true });
       try {
-        const { periodQuery, country, ...restParams } = params;
-        // const curr = country || "GHS"
+        const { periodQuery, ...restParams } = params;
+
         const [seg, top] = await Promise.all([
           api.get(`/analytics/customers/segments`, {
-            params: { ...periodQuery, currency: country, ...restParams },
+            params: { ...periodQuery, ...restParams },
           }),
           api.get(`/analytics/customers/top`, {
-            params: { ...restParams, country, ...periodQuery },
+            params: { ...periodQuery, ...restParams },
           }),
         ]);
+
         set({
-          data: {
-            seg: seg.data,
-            top: top.data,
-          },
+          data: { seg: seg.data, top: top.data },
           totalCount: top.data.total,
           isLoading: false,
           isRefetching: false,

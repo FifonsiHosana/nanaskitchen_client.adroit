@@ -1,22 +1,32 @@
-import { GH, EU, US } from "country-flag-icons/react/3x2"
-import { Package } from "lucide-react"
-import { dateNormalize, fmt, PERIOD_LABELS, STATUS_CONFIG } from "../lib/utils"
-import { useOrderStore, type orderStatsTypes, type statusType } from "../store/use-order-store"
-import { SummaryCard } from "./summary-card"
-import { useOrderParams } from "../lib/useOrderParams"
+import { GH, EU, US } from "country-flag-icons/react/3x2";
+import { Package } from "lucide-react";
+import { dateNormalize, fmt, PERIOD_LABELS, STATUS_CONFIG } from "../lib/utils";
+import {
+  useOrderStore,
+  type orderStatsTypes,
+  type statusType,
+} from "../store/use-order-store";
+import { SummaryCard } from "./summary-card";
+import { useOrderParams } from "../lib/useOrderParams";
 
 const OrderStats = ({ orderStats }: { orderStats: orderStatsTypes }) => {
-  const {params} = useOrderParams();
-  const {pageStatus} = useOrderStore();
+  const { params } = useOrderParams();
+  const { pageStatus } = useOrderStore();
 
-const funnelStatus =
-  pageStatus === "completed" ? "completed" : pageStatus === "awaiting_payment" ? "pending" : pageStatus === "delivered" ? "delivered" : null
-  
+  const funnelStatus =
+    pageStatus === "completed"
+      ? "completed"
+      : pageStatus === "awaiting_payment"
+        ? "pending"
+        : pageStatus === "delivered"
+          ? "delivered"
+          : null;
+
   const periodSub = params.periodQuery.period
-    ? PERIOD_LABELS[params?.periodQuery?.period || "all_time"]
+    ? PERIOD_LABELS[params?.periodQuery?.period || "this_week"]
     : params.periodQuery.from
       ? `${dateNormalize(params.periodQuery.from as string)} to ${dateNormalize(params.periodQuery.to as string)}`
-      : PERIOD_LABELS[ "all_time"]
+      : PERIOD_LABELS["this_week"];
   return (
     <div className="mb-4 grid grid-cols-2 gap-4 md:grid-cols-4">
       <SummaryCard
@@ -48,7 +58,7 @@ const funnelStatus =
         sub={periodSub}
       />
     </div>
-  )
-}
+  );
+};
 
-export default OrderStats
+export default OrderStats;

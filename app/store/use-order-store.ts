@@ -56,7 +56,7 @@ interface orderStore {
 
 export const useOrderStore = create<orderStore>((set, get) => ({
   orders: [],
-  statsPeriod: "this_month",
+  statsPeriod: "this_week",
   pageStatus: "all",
   selectedOrder: null,
   orderStats: {
@@ -81,6 +81,12 @@ export const useOrderStore = create<orderStore>((set, get) => ({
     }
     try {
       const { periodQuery, ...restParams } = params;
+      console.log(
+        "[fetchOrders] periodQuery:",
+        periodQuery,
+        "restParams:",
+        restParams,
+      );
 
       const [response, stats] = await Promise.all([
         api.get(`/orders/${status}`, {

@@ -79,7 +79,7 @@ export function AddFlavorDialog() {
         </FieldGroup>
         <DialogFooter>
           <DialogClose asChild>
-            <Button  type="button">
+            <Button variant={"destructive"} type="button">
               Cancel
             </Button>
           </DialogClose>
