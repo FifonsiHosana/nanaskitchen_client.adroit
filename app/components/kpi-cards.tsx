@@ -22,9 +22,11 @@ import type {
 } from "../store/use-analytics-store";
 import { formatChartLabel } from "../lib/chartUtils";
 
+// Harmonized Chart Config mapped to theme CSS variables
 const chartConfig = {
-  desktop: { label: "Desktop", color: "#534AB7" },
-  mobile: { label: "Mobile", color: "#1D9E75" },
+  desktop: { label: "Desktop", color: "var(--color-chart-2)" },
+  mobile: { label: "Mobile", color: "var(--color-chart-1)" },
+  bounce: { label: "Bounce Rate", color: "var(--color-chart-3)" },
 } satisfies ChartConfig;
 
 interface KpiCardsProps {
@@ -38,7 +40,6 @@ export function KpiCards({
   dailyChartData,
   chartGrouping,
 }: KpiCardsProps) {
-  // Hide axis tick labels when there are too many data points (daily view)
   const showTicks = dailyChartData.length <= 14;
 
   const tooltipLabelFormatter = (value: ReactNode) =>
@@ -49,10 +50,10 @@ export function KpiCards({
 
   return (
     <div className="grid shrink-0 gap-4 md:grid-cols-4">
-      {/* 1. User Engagement — desktop vs mobile bars */}
+      {/* 1. User Engagement — High contrast split representing primary vs secondary devices */}
       <StatCard
         label="User Engagement"
-        description="Engaged vs total sessions ."
+        description="Engaged vs total sessions."
         value={`${kpi.engagedSessions.toLocaleString()} / ${kpi.sessions.toLocaleString()}`}
       >
         <ChartContainer
@@ -78,42 +79,38 @@ export function KpiCards({
             />
             <Bar
               dataKey="desktop"
-              fill="var(--color-desktop)"
+              fill="var(--color-chart-2)"
               radius={[2, 2, 0, 0]}
-              opacity={0.8}
             />
             <Bar
               dataKey="mobile"
-              fill="var(--color-mobile)"
+              fill="var(--color-chart-2)"
               radius={[2, 2, 0, 0]}
-              opacity={0.5}
+              opacity={0.8}
             />
           </BarChart>
         </ChartContainer>
       </StatCard>
 
-      {/* 2. Unique Visitors — area chart */}
+      {/* 2. Unique Visitors — Trustworthy Deep Navy area chart for user volume */}
       <StatCard
         label="Unique Visitors"
         description="Users visiting the platform."
         value={kpi.uniqueVisitors.toLocaleString()}
       >
         <ChartContainer config={chartConfig} className="flex-1 h-full w-full">
-          <AreaChart
-            data={dailyChartData}
-            // margin={}
-          >
+          <AreaChart data={dailyChartData}>
             <defs>
-              <linearGradient id="fillUnique">
+              <linearGradient id="fillUnique" x1="0" y1="0" x2="0" y2="1">
                 <stop
                   offset="5%"
-                  stopColor="var(--color-mobile)"
-                  stopOpacity={0.3}
+                  stopColor="var(--color-chart-2)"
+                  stopOpacity={0.4}
                 />
                 <stop
                   offset="95%"
-                  stopColor="var(--color-mobile)"
-                  stopOpacity={0}
+                  stopColor="var(--color-chart-2)"
+                  stopOpacity={0.0}
                 />
               </linearGradient>
             </defs>
@@ -136,13 +133,13 @@ export function KpiCards({
               dataKey="mobile"
               type="natural"
               fill="url(#fillUnique)"
-              stroke="var(--color-mobile)"
+              stroke="var(--color-chart-2)"
               strokeWidth={2}
             />
           </AreaChart>
         </ChartContainer>
       </StatCard>
-      {/* 3. Total Sessions — bar chart */}
+
       <StatCard
         label="Total Sessions"
         description="Sessions within the period."
@@ -171,27 +168,21 @@ export function KpiCards({
             />
             <Bar
               dataKey="desktop"
-              fill="var(--color-desktop)"
+              fill="var(--color-chart-2)"
               radius={[2, 2, 0, 0]}
             />
           </BarChart>
         </ChartContainer>
       </StatCard>
 
-      {/* 4. Bounce Rate — line chart */}
+      {/* 4. Bounce Rate — Cautionary warm red line to signals drop-offs/bounce */}
       <StatCard
         label="Bounce Rate"
         description="Single-page visits."
         value={`${kpi.bounceRate}%`}
       >
-        <ChartContainer
-          config={chartConfig}
-          // className="aspect-auto h-full w-full"
-        >
-          <LineChart
-            data={dailyChartData}
-            // margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
-          >
+        <ChartContainer config={chartConfig}>
+          <LineChart data={dailyChartData}>
             <XAxis
               dataKey="date"
               hide={showTicks}
@@ -202,15 +193,12 @@ export function KpiCards({
             />
             <ChartTooltip
               content={
-                <ChartTooltipContent
-                  labelFormatter={tooltipLabelFormatter}
-                  // formatter={(value) => [`${value}`, "Sessions"]}
-                />
+                <ChartTooltipContent labelFormatter={tooltipLabelFormatter} />
               }
             />
             <Line
               dataKey="desktop"
-              stroke="#D85A30"
+              stroke="var(--color-destructive)"
               strokeWidth={2}
               dot={false}
             />

@@ -23,7 +23,7 @@ const users = () => {
         <UserCircle />
         Create User
       </Button>
-      <Card className="w-full max-w-4xl p-4">
+      <Card className="w-full p-4">
         <AdminsTable />
       </Card>
     </div>

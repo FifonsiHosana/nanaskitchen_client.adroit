@@ -163,15 +163,26 @@ export function CreateAdminForm({
             {error}
           </div>
         )}
-
-        <Button
-          className="w-full cursor-pointer"
-          size="lg"
-          type="submit"
-          disabled={isLoading}
-        >
-          {isLoading ? "Creating..." : "Create Admin"}
-        </Button>
+        <div className="flex gap-2 justify-end">
+          <Button
+            className="cursor-pointer"
+            size="lg"
+            type="button"
+            disabled={isLoading}
+            variant={"destructive"}
+            onClick={() => navigate(-1)}
+          >
+            Cancel
+          </Button>
+          <Button
+            className="cursor-pointer"
+            size="lg"
+            type="submit"
+            disabled={isLoading}
+          >
+            {isLoading ? "Creating..." : "Create Admin"}
+          </Button>
+        </div>
       </FieldGroup>
     </form>
   );

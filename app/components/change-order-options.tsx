@@ -10,14 +10,14 @@ const STATUS = [
     label: "Awaiting Payment",
     color: "var(--status-pending)",
     nextStatus: "completed",
-    nextColor: "var(--status-delivered)",
+    nextColor: "var(--status-completed)",
   },
   {
     value: "completed",
     label: "Paid",
     color: "var(--status-completed)",
     nextStatus: "delivered",
-    nextColor: "var(--status-completed)",
+    nextColor: "var(--status-delivered)",
   },
   {
     value: "delivered",
@@ -48,23 +48,37 @@ const ChangeOrderOptions = ({
 
   return (
     <>
-      {filteredStatus.map((item) => (
-        <DropdownMenuItem
-          key={item.value}
-          style={{ "--hover-color": item.nextColor } as React.CSSProperties}
-          className="focus:bg-(--hover-color)"
-          onClick={async () => {
-            await updateOrderStatus(id, item.nextStatus as statusType, params);
-            toast.success(
-              status === "all"
-                ? `Order updated to ${item.nextStatus}`
-                : `Order marked as ${item.nextStatus}`,
-            );
-          }}
-        >
-          {item.nextStatus}
-        </DropdownMenuItem>
-      ))}
+      {filteredStatus.map((item) => {
+        const displayStatus =
+          item.nextStatus === "completed"
+            ? "Paid"
+            : item.nextStatus === "delivered"
+              ? "Delivered"
+              : item.nextStatus;
+
+        return (
+          <DropdownMenuItem
+            key={item.value}
+            style={{ "--hover-color": item.nextColor } as React.CSSProperties}
+            className="focus:bg-(--hover-color)"
+            onClick={async () => {
+              await updateOrderStatus(
+                id,
+                item.nextStatus as statusType,
+                params,
+              );
+
+              toast.success(
+                status === "all"
+                  ? `Order updated to ${displayStatus}`
+                  : `Order marked as ${displayStatus}`,
+              );
+            }}
+          >
+            {displayStatus}
+          </DropdownMenuItem>
+        );
+      })}
     </>
   );
 };

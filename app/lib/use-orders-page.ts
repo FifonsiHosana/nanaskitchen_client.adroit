@@ -1,14 +1,15 @@
-import { useEffect } from "react"
-import { useOrderParams } from "./useOrderParams"
-import { useOrderStore, type statusType } from "../store/use-order-store"
+import { useEffect } from "react";
+import { useOrderParams } from "./useOrderParams";
+import { useOrderStore, type statusType } from "../store/use-order-store";
 
 export function useOrdersPage(status: statusType) {
-  const { params } = useOrderParams()
+  const { params } = useOrderParams();
   const { fetchOrders, orderStats, isLoading, isTableLoading, pageStatus } =
-    useOrderStore()
+    useOrderStore();
 
   useEffect(() => {
-    fetchOrders(status, params)
+    console.log("[useOrdersPage] firing fetchOrders with params:", params);
+    fetchOrders(status, params);
   }, [
     fetchOrders,
     status,
@@ -22,11 +23,11 @@ export function useOrdersPage(status: statusType) {
     params.customFrom,
     params.customTo,
     params.pageSize,
-  ])
+  ]);
 
   useEffect(() => {
-    useOrderStore.setState({ orders: [] })
-  }, [pageStatus, params.pricingGroup])
+    useOrderStore.setState({ orders: [] });
+  }, [pageStatus, params.pricingGroup]);
 
-  return { orderStats, isLoading, isTableLoading }
+  return { orderStats, isLoading, isTableLoading };
 }

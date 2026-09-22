@@ -1,4 +1,3 @@
-import { useNavigate } from "react-router";
 import {
   Table,
   TableBody,
@@ -15,16 +14,33 @@ import { AuditActionBadge } from "./audit_badge";
 import { Skeleton } from "~/components/ui/skeleton";
 
 export function AuditTable() {
-  const navigate = useNavigate();
-  const { params } = useAuditParams();
+  const { params, setParam } = useAuditParams();
   const { logs, totalPages, isLoading, error, fetchLogs } = useAuditStore();
 
   useEffect(() => {
     fetchLogs(params.page, params.pageSize);
-  }, [params.page, params.pageSize]);
+  }, [params.page, params.pageSize, fetchLogs]);
+
+  // Clamp the URL page into the known range. If the URL points past the last
+  // page (e.g. bookmarked deep page, or rows were deleted), step it back —
+  // the page change triggers the refetch above.
+  const safeTotal = Number.isFinite(totalPages)
+    ? Math.max(1, totalPages)
+    : 1;
+  const safePage = Number.isFinite(params.page)
+    ? Math.min(Math.max(1, params.page), safeTotal)
+    : 1;
+
+  useEffect(() => {
+    if (!isLoading && params.page !== safePage) {
+      setParam("page", String(safePage));
+    }
+  }, [isLoading, params.page, safePage, setParam]);
+
+  const showSkeleton = isLoading && logs.length === 0;
 
   return (
-    <>
+    <div className="p-4">
       <Table>
         <TableHeader>
           <TableRow>
@@ -36,7 +52,7 @@ export function AuditTable() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {isLoading && logs.length === 0 ? (
+          {showSkeleton ? (
             Array.from({ length: 8 }).map((_, i) => (
               <TableRow key={`audit-loading-${i}`}>
                 <TableCell>
@@ -86,10 +102,10 @@ export function AuditTable() {
         </TableBody>
       </Table>
       <PaginationOrders
-        currentPage={params.page}
+        currentPage={safePage}
         currentTable="audit"
-        totalPages={totalPages}
+        totalPages={safeTotal}
       />
-    </>
+    </div>
   );
 }

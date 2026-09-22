@@ -34,23 +34,42 @@ const PaginationOrders = ({
   totalPages,
   currentTable,
 }: PaginationProps) => {
-  const { params, setParam, setParams } =
+  // All param hooks run unconditionally (rules of hooks) — pick the one
+  // matching `currentTable` below.
+  const orderParams = useOrderParams();
+  const feedbackParams = useFeedbackParams();
+  const auditParams = useAuditParams();
+  const shippingParams = useShippingParams();
+  const customersParams = useCustomersParams();
+
+  const { params, setParam } =
     currentTable === "orders"
-      ? useOrderParams()
+      ? orderParams
       : currentTable === "feedback"
-        ? useFeedbackParams()
+        ? feedbackParams
         : currentTable === "audit"
-          ? useAuditParams()
+          ? auditParams
           : currentTable === "shipping"
-            ? useShippingParams()
-            : useCustomersParams();
+            ? shippingParams
+            : customersParams;
+
+  // Guard against undefined/NaN totals (e.g. before the first fetch resolves).
+  const safeTotal = Number.isFinite(totalPages)
+    ? Math.max(1, Math.floor(totalPages))
+    : 1;
+  const safeCurrent = Number.isFinite(currentPage)
+    ? Math.min(Math.max(1, Math.floor(currentPage)), safeTotal)
+    : 1;
+  const isFirst = safeCurrent <= 1;
+  const isLast = safeCurrent >= safeTotal;
+
   return (
     <div className="">
       <Pagination>
         <Field orientation="horizontal" className="w-fit">
           <FieldLabel htmlFor="select-rows-per-page">Rows per page</FieldLabel>
           <Select
-            defaultValue={String(params.pageSize)}
+            value={String(params.pageSize)}
             onValueChange={(value) => setParam("pageSize", value)}
           >
             <SelectTrigger className="w-20" id="select-rows-per-page">
@@ -69,22 +88,24 @@ const PaginationOrders = ({
         <PaginationContent>
           <PaginationItem>
             <PaginationPrevious
-              onClick={() => setParam("page", String(currentPage - 1))}
+              onClick={(e) => {
+                e.preventDefault();
+                if (!isFirst) setParam("page", String(safeCurrent - 1));
+              }}
+              aria-disabled={isFirst}
               className={
-                currentPage === 1
-                  ? "pointer-events-none opacity-50"
-                  : "cursor-pointer"
+                isFirst ? "pointer-events-none opacity-50" : "cursor-pointer"
               }
             />
           </PaginationItem>
 
-          {getPageNumbers(currentPage, totalPages).map((page, i) => (
+          {getPageNumbers(safeCurrent, safeTotal).map((page, i) => (
             <PaginationItem key={i}>
               {page === "ellipsis" ? (
                 <PaginationEllipsis />
               ) : (
                 <PaginationLink
-                  isActive={currentPage === page}
+                  isActive={safeCurrent === page}
                   onClick={(e) => {
                     e.preventDefault();
                     setParam("page", String(page));
@@ -101,12 +122,11 @@ const PaginationOrders = ({
             <PaginationNext
               onClick={(e) => {
                 e.preventDefault();
-                setParam("page", String(currentPage + 1));
+                if (!isLast) setParam("page", String(safeCurrent + 1));
               }}
+              aria-disabled={isLast}
               className={
-                currentPage === totalPages
-                  ? "pointer-events-none opacity-50"
-                  : "cursor-pointer"
+                isLast ? "pointer-events-none opacity-50" : "cursor-pointer"
               }
             />
           </PaginationItem>
